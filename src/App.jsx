@@ -5,9 +5,12 @@ import FeedbackReport from './components/FeedbackReport';
 import Profile from './components/Profile';
 
 import BrandHeader from './components/BrandHeader';
+import { ApiKeyModal } from './components/ApiKeyModal';
 
 function App() {
+  const [showKeyModal, setShowKeyModal] = useState(false);
   const [appState, setAppState] = useState({
+
     phase: "profile",      // Start on profile if they have history, or onboarding. Let's do onboarding for the demo standard.
     userProfile: {
       whoAreYou: "",
@@ -36,7 +39,11 @@ function App() {
 
   // For the demo, let's force start on onboarding, but provide a way to see profile
   useEffect(() => {
-      // Intentionally empty for now, just declaring structure
+    const groq = localStorage.getItem('VITE_GROQ_API_KEY') || import.meta.env.VITE_GROQ_API_KEY;
+    const gemini = localStorage.getItem('VITE_GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
+    if (!groq && !gemini) {
+      setShowKeyModal(true);
+    }
   }, []);
 
   return (
@@ -64,7 +71,9 @@ function App() {
           </div>
         )}
       </div>
+      {showKeyModal && <ApiKeyModal onSave={() => setShowKeyModal(false)} />}
     </div>
+
   );
 }
 

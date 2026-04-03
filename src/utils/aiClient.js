@@ -1,5 +1,6 @@
-const apiKeyGemini = import.meta.env.VITE_GEMINI_API_KEY;
-const apiKeyGroq = import.meta.env.VITE_GROQ_API_KEY;
+const getGeminiKey = () => localStorage.getItem('VITE_GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
+const getGroqKey = () => localStorage.getItem('VITE_GROQ_API_KEY') || import.meta.env.VITE_GROQ_API_KEY;
+
 
 /**
  * Transcribes an audio Blob using Groq's hosted Whisper large-v3 model.
@@ -9,8 +10,9 @@ const apiKeyGroq = import.meta.env.VITE_GROQ_API_KEY;
  * @returns {Promise<string>} - The transcribed text
  */
 export async function transcribeAudio(audioBlob) {
+  const apiKeyGroq = getGroqKey();
   if (!apiKeyGroq) {
-    throw new Error('VITE_GROQ_API_KEY is not set. Please add it to your .env file.');
+    throw new Error('Groq API Key is not set. Please add it to your browser settings.');
   }
 
   const formData = new FormData();
@@ -25,7 +27,7 @@ export async function transcribeAudio(audioBlob) {
 
   const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${apiKeyGroq}` },
+    headers: { Authorization: `Bearer ${getGroqKey()}` },
     body: formData,
   });
 
@@ -65,7 +67,7 @@ export async function robustGenerate({ systemInstruction, contents, thermal = 0.
   for (const { id, model } of PROVIDERS) {
     try {
       const isGroq = id === 'groq';
-      const key = isGroq ? apiKeyGroq : apiKeyGemini;
+      const key = isGroq ? getGroqKey() : getGeminiKey();
 
       if (!key) continue; // Skip if key not found
 
