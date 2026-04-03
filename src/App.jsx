@@ -1,0 +1,71 @@
+import React, { useState, useEffect } from 'react';
+import Onboarding from './components/Onboarding';
+import Simulation from './components/Simulation';
+import FeedbackReport from './components/FeedbackReport';
+import Profile from './components/Profile';
+
+import BrandHeader from './components/BrandHeader';
+
+function App() {
+  const [appState, setAppState] = useState({
+    phase: "profile",      // Start on profile if they have history, or onboarding. Let's do onboarding for the demo standard.
+    userProfile: {
+      whoAreYou: "",
+      practiceGoal: "",
+      scenario: "",
+    },
+    persona: null,
+    conversationHistory: [],
+    turnCount: 0,
+    feedbackResult: null,
+    feedbackRating: null,
+    feedbackReason: "",
+  });
+
+  // Check initial state - if no past sessions, go straight to onboarding
+  useEffect(() => {
+    const sessions = JSON.parse(localStorage.getItem('groundwork_sessions') || '[]');
+    if (sessions.length === 0 && appState.phase === 'profile') {
+      setAppState(prev => ({ ...prev, phase: 'onboarding' }));
+    } else if (appState.phase === 'profile') {
+      // Just stay on profile
+    } else if (appState.phase === 'onboarding' && appState.userProfile.scenario === "") {
+        // Reset state for new practice
+    }
+  }, []);
+
+  // For the demo, let's force start on onboarding, but provide a way to see profile
+  useEffect(() => {
+      // Intentionally empty for now, just declaring structure
+  }, []);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+      <BrandHeader />
+      <div style={{ flex: 1, overflow: 'auto' }}>
+        {appState.phase === 'profile' && (
+          <div key="profile" className="animate-in">
+            <Profile appState={appState} setAppState={setAppState} />
+          </div>
+        )}
+        {appState.phase === 'onboarding' && (
+          <div key="onboarding" className="animate-in">
+            <Onboarding appState={appState} setAppState={setAppState} />
+          </div>
+        )}
+        {appState.phase === 'simulation' && (
+          <div key="simulation" className="animate-in" style={{ height: '100%' }}>
+            <Simulation appState={appState} setAppState={setAppState} />
+          </div>
+        )}
+        {appState.phase === 'feedback' && (
+          <div key="feedback" className="animate-in">
+            <FeedbackReport appState={appState} setAppState={setAppState} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
