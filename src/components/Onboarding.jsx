@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { generatePersona } from '../utils/personaEngine';
 import { ArrowRight, Briefcase, Target, Layers, LayoutDashboard } from 'lucide-react';
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const getGeminiKey = () => localStorage.getItem('VITE_GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
 
 export function Onboarding({ appState, setAppState }) {
   const [role, setRole] = useState('Junior Contributor / Associate');
@@ -12,8 +12,9 @@ export function Onboarding({ appState, setAppState }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!apiKey) {
-      setErrorObj("VITE_GEMINI_API_KEY is missing from environment. Add it to .env.local.");
+    const activeKey = getGeminiKey();
+    if (!activeKey) {
+      setErrorObj("Gemini API Key is missing. Please set it in the API Configuration modal (refresh if needed).");
       return;
     }
     
@@ -21,7 +22,8 @@ export function Onboarding({ appState, setAppState }) {
     setErrorObj(null);
     try {
       const userProfile = { role, goal };
-      const generatedPersona = await generatePersona(apiKey, userProfile);
+      const generatedPersona = await generatePersona(activeKey, userProfile);
+
       
       // Update app state smoothly to simulation phase
       setAppState(prev => ({
