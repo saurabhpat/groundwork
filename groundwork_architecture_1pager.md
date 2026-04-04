@@ -8,27 +8,27 @@ Groundwork is a professional simulation platform designed to help users master h
 ## 1. Application Stages
 
 ### Stage 0: Proposition Landing Page
-![Proposition Landing Page](images/landing.png)
+![Proposition Landing Page](file:///C:/Users/patil/.gemini/antigravity/brain/173afa8c-2de5-4687-9f93-d20c1e8c4041/landing_page_screen_1775333175176.png)
 The proposition-led entry point identifies the core mission: "Talk to AI before talking to the real person." It utilizes high-impact typography and an animated conversational preview to immediately demonstrate the value of safe, private practice.
 
 ### Stage 1: Analytical Profile & History
-![Analytical Profile](images/profile.png)
+![Analytical Profile](file:///C:/Users/patil/.gemini/antigravity/brain/db08ab87-1c88-45d9-9c44-870d35c59490/profile_png_1775285201276.png)
 The analytical dashboard provides a high-level overview of past performance and entry into the simulation engine. Users can review their historical performance trends and session summaries before starting a new practice session.
 
 ### Stage 2: Career Context Onboarding
-![Career Onboarding](images/onboarding.png)
+![Career Onboarding](file:///C:/Users/patil/.gemini/antigravity/brain/db08ab87-1c88-45d9-9c44-870d35c59490/onboarding_png_1775285214094.png)
 A structured 6-step interactive interview gathers critical context about the user's specific scenario, goals, and communication blockers. This stage ensures the AI has a granular understanding of the user's professional situation.
 
 ### Stage 3: Personalized Coaching Brief
-![Coaching Brief](images/brief.png)
+![Coaching Brief](file:///C:/Users/patil/.gemini/antigravity/brain/db08ab87-1c88-45d9-9c44-870d35c59490/coaching_png_1775285331045.png)
 Before entering the simulation, users receive a synthesized coaching brief and calibrate the "intensity" levels for the practice. This includes adjusting power dynamics and the counterpart's initial disposition.
 
 ### Stage 4: Live AI Simulation
-![AI Simulation](images/simulation.png)
+![AI Simulation](file:///C:/Users/patil/.gemini/antigravity/brain/db08ab87-1c88-45d9-9c44-870d35c59490/simulation_png_1775285435024.png)
 The core interaction phase provides a rich, multi-modal simulation with real-time health tracking and phase-specific coaching guidance. The AI responds authentically to the user's tone and strategy.
 
 ### Stage 5: Analytical Feedback Report
-![Analytical Report](images/feedback.png)
+![Analytical Report](file:///C:/Users/patil/.gemini/antigravity/brain/db08ab87-1c88-45d9-9c44-870d35c59490/feedback_png_1775285475623.png)
 A deep-dive analysis into the session performance, highlighting rhetorical markers and providing stronger phrasing alternatives. This feedback loop is essential for iterative professional improvement.
 
 ---
