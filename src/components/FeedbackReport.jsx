@@ -87,6 +87,11 @@ ${formattedTranscript}`;
             history: conversationHistory
           });
           localStorage.setItem('groundwork_sessions', JSON.stringify(sessions));
+
+          // Increment phase session counter for this scenario
+          const phaseData = JSON.parse(localStorage.getItem('groundwork_phases') || '{}');
+          phaseData[userProfile.scenario] = (phaseData[userProfile.scenario] || 0) + 1;
+          localStorage.setItem('groundwork_phases', JSON.stringify(phaseData));
         }
       } catch (err) {
         if (mounted) {

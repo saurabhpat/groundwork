@@ -1,13 +1,7 @@
-const getGeminiKey = () => localStorage.getItem('VITE_GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
 const getGroqKey = () => localStorage.getItem('VITE_GROQ_API_KEY') || import.meta.env.VITE_GROQ_API_KEY;
-
 
 /**
  * Transcribes an audio Blob using Groq's hosted Whisper large-v3 model.
- * No extra npm packages needed — uses native fetch + FormData.
- * 
- * @param {Blob} audioBlob - The recorded audio (webm/mp4/wav etc.)
- * @returns {Promise<string>} - The transcribed text
  */
 export async function transcribeAudio(audioBlob) {
   const apiKeyGroq = getGroqKey();
@@ -16,7 +10,6 @@ export async function transcribeAudio(audioBlob) {
   }
 
   const formData = new FormData();
-  // Groq requires a filename extension so it knows the format
   const extension = audioBlob.type.includes('mp4') ? 'mp4'
     : audioBlob.type.includes('ogg') ? 'ogg'
     : 'webm';
@@ -27,7 +20,7 @@ export async function transcribeAudio(audioBlob) {
 
   const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${getGroqKey()}` },
+    headers: { Authorization: `Bearer ${apiKeyGroq}` },
     body: formData,
   });
 
@@ -40,16 +33,11 @@ export async function transcribeAudio(audioBlob) {
   return data.text || '';
 }
 
-// Models in order of fallback (Groq is preferred for RPM/Speed, Gemini for reasoning)
+// Models in order of fallback
 const PROVIDERS = [
-  { id: 'groq', model: 'llama-3.3-70b-versatile' },
-  { id: 'gemini', model: 'gemini-2.0-flash' },
-  { id: 'gemini', model: 'gemini-flash-latest' }
+  { id: 'groq', model: 'llama-3.3-70b-versatile' }
 ];
 
-/**
- * Strips markdown and potentially malformed text to return clean JSON
- */
 function cleanJson(raw) {
   let clean = raw.trim();
   if (clean.startsWith("```json")) clean = clean.replace(/^```json\s*/, '');
@@ -59,81 +47,72 @@ function cleanJson(raw) {
 }
 
 /**
- * Unified, fallback-capable call to Groq or Gemini
+ * Unified call to Groq
  */
 export async function robustGenerate({ systemInstruction, contents, thermal = 0.7 }) {
   let lastError = null;
+  const key = getGroqKey();
+
+  if (!key) {
+    throw new Error('Groq API Key is missing. Please configure it in settings.');
+  }
 
   for (const { id, model } of PROVIDERS) {
     try {
-      const isGroq = id === 'groq';
-      const key = isGroq ? getGroqKey() : getGeminiKey();
-
-      if (!key) continue; // Skip if key not found
-
-      const endpoint = isGroq 
-        ? "https://api.groq.com/openai/v1/chat/completions"
-        : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+      const endpoint = "https://api.groq.com/openai/v1/chat/completions";
       
-      const payload = isGroq 
-        ? {
-            model,
-            messages: [
-              ...(systemInstruction ? [{ role: "system", content: systemInstruction }] : []),
-              ...contents.map(c => ({ 
-                role: c.role === 'model' ? 'assistant' : c.role, 
-                content: Array.isArray(c.parts) ? c.parts[0].text : (typeof c.content === 'string' ? c.content : JSON.stringify(c.content))
-              }))
-            ],
-            temperature: thermal,
-            response_format: { type: "json_object" }
-          }
-        : {
-            system_instruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
-            contents,
-            generationConfig: { 
-              maxOutputTokens: 2000, 
-              temperature: thermal,
-              response_mime_type: "application/json" 
-            }
-          };
+      const payload = {
+        model,
+        messages: [
+          ...(systemInstruction ? [{ role: "system", content: systemInstruction }] : []),
+          ...contents.map(c => ({ 
+            role: c.role === 'model' ? 'assistant' : c.role, 
+            content: Array.isArray(c.parts) ? c.parts[0].text : (typeof c.content === 'string' ? c.content : JSON.stringify(c.content))
+          }))
+        ],
+        temperature: thermal,
+        response_format: { type: "json_object" }
+      };
 
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          ...(isGroq ? { 'Authorization': `Bearer ${key}` } : {})
+          'Authorization': `Bearer ${key}`
         },
         body: JSON.stringify(payload)
       });
 
-      // Handle Quota (429) or Service Down (5xx) by falling back to next provider
-      if (res.status === 429 || res.status >= 500) {
-        console.warn(`${id.toUpperCase()} model ${model} failed (${res.status}). Downshifting...`);
-        lastError = `${id.toUpperCase()} Error: ${res.status}`;
+      if (!res.ok) {
+        const errBody = await res.text();
+        console.warn(`Groq error (${res.status}): ${errBody}`);
+        lastError = `Groq (${res.status}): ${errBody}`;
         continue; 
       }
 
       const data = await res.json();
-      
-      const rawContent = isGroq 
-        ? data.choices[0].message.content
-        : data.candidates[0].content.parts[0].text;
+      const rawContent = data.choices?.[0]?.message?.content;
+
+      if (!rawContent) {
+        lastError = "Groq returned empty response";
+        continue;
+      }
 
       const stripped = cleanJson(rawContent);
       
       try {
         return JSON.parse(stripped);
       } catch (parseErr) {
-        throw new Error(`${id.toUpperCase()} malformed JSON: ${parseErr.message}`);
+        throw new Error(`Groq malformed JSON: ${parseErr.message}`);
       }
 
     } catch (err) {
       lastError = err.message;
       if (model === PROVIDERS[PROVIDERS.length - 1].model) throw err;
-      console.warn(`${id.toUpperCase()} failed: ${err.message}. Retrying next...`);
+      console.warn(`Groq failed: ${err.message}. Retrying next...`);
     }
   }
 
-  throw new Error(`All AI Providers failed. Last error: ${lastError}`);
+  throw new Error(`AI Generation failed. Last error: ${lastError}`);
 }
+

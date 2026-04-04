@@ -55,9 +55,8 @@ export function Profile({ appState, setAppState }) {
               <span style={{ color: '#C8B89A' }}>should never be your first practice.</span>
             </h1>
 
-            <p style={{ color: '#605850', fontSize: '16px', lineHeight: '1.7', maxWidth: '500px', margin: '0 auto 56px' }}>
-              Groundwork simulates real high-stakes career conversations — promotions, 
-              disagreements, negotiations — so you walk in grounded, not guessing.
+            <p style={{ color: '#807870', fontSize: '16px', lineHeight: '1.7', maxWidth: '500px', margin: '0 auto 56px' }}>
+              Practice high-stakes career moments like salary negotiations and team conflicts in a safe space. Walk into the real room with calm confidence and a plan that actually lands.
             </p>
 
             {/* How it works */}
@@ -100,7 +99,7 @@ export function Profile({ appState, setAppState }) {
           >
             <Play size={20} fill="currentColor" /> Start Your First Practice
           </button>
-          <p style={{ fontSize: '12px', color: '#3A3A3A', margin: 0 }}>2 questions · &lt;30 seconds to start</p>
+          <p style={{ fontSize: '12px', color: '#605850', margin: 0 }}>2 questions · &lt;30 seconds to start</p>
         </div>
       </div>
     );

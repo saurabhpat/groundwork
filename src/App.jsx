@@ -3,7 +3,7 @@ import Onboarding from './components/Onboarding';
 import Simulation from './components/Simulation';
 import FeedbackReport from './components/FeedbackReport';
 import Profile from './components/Profile';
-
+import { CoachingBrief } from './components/CoachingBrief';
 import BrandHeader from './components/BrandHeader';
 import { ApiKeyModal } from './components/ApiKeyModal';
 
@@ -11,11 +11,16 @@ function App() {
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [appState, setAppState] = useState({
 
-    phase: "profile",      // Start on profile if they have history, or onboarding. Let's do onboarding for the demo standard.
+    phase: "profile",
     userProfile: {
       whoAreYou: "",
       practiceGoal: "",
       scenario: "",
+      practicePhase: 1,
+      // Calibration Parameters
+      powerDynamic: "Equal",
+      stressLevel: 50,
+      counterpartDisposition: "Neutral",
     },
     persona: null,
     conversationHistory: [],
@@ -30,18 +35,13 @@ function App() {
     const sessions = JSON.parse(localStorage.getItem('groundwork_sessions') || '[]');
     if (sessions.length === 0 && appState.phase === 'profile') {
       setAppState(prev => ({ ...prev, phase: 'onboarding' }));
-    } else if (appState.phase === 'profile') {
-      // Just stay on profile
-    } else if (appState.phase === 'onboarding' && appState.userProfile.scenario === "") {
-        // Reset state for new practice
     }
   }, []);
 
   // For the demo, let's force start on onboarding, but provide a way to see profile
   useEffect(() => {
     const groq = localStorage.getItem('VITE_GROQ_API_KEY') || import.meta.env.VITE_GROQ_API_KEY;
-    const gemini = localStorage.getItem('VITE_GEMINI_API_KEY') || import.meta.env.VITE_GEMINI_API_KEY;
-    if (!groq && !gemini) {
+    if (!groq) {
       setShowKeyModal(true);
     }
   }, []);
@@ -60,6 +60,11 @@ function App() {
             <Onboarding appState={appState} setAppState={setAppState} />
           </div>
         )}
+        {appState.phase === 'coaching' && (
+          <div key="coaching" className="animate-in" style={{ height: '100%' }}>
+            <CoachingBrief appState={appState} setAppState={setAppState} />
+          </div>
+        )}
         {appState.phase === 'simulation' && (
           <div key="simulation" className="animate-in" style={{ height: '100%' }}>
             <Simulation appState={appState} setAppState={setAppState} />
@@ -73,7 +78,6 @@ function App() {
       </div>
       {showKeyModal && <ApiKeyModal onSave={() => setShowKeyModal(false)} />}
     </div>
-
   );
 }
 

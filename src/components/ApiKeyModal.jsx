@@ -3,11 +3,9 @@ import { Key, ShieldCheck, Cpu } from 'lucide-react';
 
 export function ApiKeyModal({ onSave }) {
   const [groqKey, setGroqKey] = useState('');
-  const [geminiKey, setGeminiKey] = useState('');
 
   const handleSave = () => {
     if (groqKey) localStorage.setItem('VITE_GROQ_API_KEY', groqKey);
-    if (geminiKey) localStorage.setItem('VITE_GEMINI_API_KEY', geminiKey);
     onSave();
   };
 
@@ -43,17 +41,6 @@ export function ApiKeyModal({ onSave }) {
               />
            </div>
 
-           <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '12px', color: '#605850', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' }}>Gemini API Key (Backup)</label>
-              <input 
-                type="password" 
-                value={geminiKey} 
-                onChange={(e) => setGeminiKey(e.target.value)}
-                placeholder="AIza..."
-                style={{ width: '100%', background: '#1A1A1A', border: '1px solid #222', borderRadius: '12px', padding: '14px 16px', color: '#F0EDE8', fontSize: '14px', outline: 'none' }}
-              />
-           </div>
-
            <div style={{ display: 'flex', gap: '12px', background: 'rgba(200,184,154,0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(200,184,154,0.1)' }}>
               <ShieldCheck size={20} color="#C8B89A" style={{ flexShrink: 0 }} />
               <p style={{ fontSize: '12px', color: '#807870', lineHeight: '1.5' }}>
@@ -62,15 +49,32 @@ export function ApiKeyModal({ onSave }) {
            </div>
         </div>
 
+
         <button 
           onClick={handleSave}
           style={{ 
             width: '100%', background: '#C8B89A', color: '#0F0F0F', border: 'none', 
-            borderRadius: '12px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer' 
+            borderRadius: '12px', padding: '16px', fontSize: '16px', fontWeight: '600', cursor: 'pointer',
+            marginBottom: '12px'
           }}
         >
           Initialize Engine
         </button>
+
+        <button 
+          onClick={() => {
+            localStorage.removeItem('VITE_GROQ_API_KEY');
+            localStorage.removeItem('VITE_GEMINI_API_KEY');
+            window.location.reload();
+          }}
+          style={{ 
+            width: '100%', background: 'transparent', color: '#605850', border: '1px solid #222', 
+            borderRadius: '12px', padding: '12px', fontSize: '13px', cursor: 'pointer'
+          }}
+        >
+          Clear Stored Keys & Refresh
+        </button>
+
 
         <p style={{ textAlign: 'center', fontSize: '11px', color: '#333', marginTop: '24px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
           Powered by Groq Llama 3 & Gemini 2

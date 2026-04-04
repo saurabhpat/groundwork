@@ -1,72 +1,59 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useConversation } from '../hooks/useConversation';
 import { useWhisperInput } from '../hooks/useWhisperInput';
-import { checkDistress, checkLength } from '../utils/guardrails';
-import { Mic, Square, Navigation2, Activity, X, Loader2 } from 'lucide-react';
+import { checkDistress, checkSensitiveTopics, checkLength } from '../utils/guardrails';
+import { Mic, Square, Navigation2, Activity, X, Loader2, Gauge, Info, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 function Simulation({ appState, setAppState }) {
   const { persona, userProfile, conversationHistory } = appState;
   const [inputText, setInputText] = useState('');
   const [turnCount, setTurnCount] = useState(appState.turnCount || 0);
-  const [showDistress, setShowDistress] = useState(false);
-  const [showLengthError, setShowLengthError] = useState(false);
-  const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [pauseReason, setPauseReason] = useState(null);
 
-  const { history, isLoading, errorObj, setErrorObj, sendUserMessage, attentionLevel, isCompleted } = useConversation({
+  const { 
+    history, isLoading, errorObj, setErrorObj, sendUserMessage, 
+    healthScore, coachingAside, isPaused, setIsPaused, isCompleted 
+  } = useConversation({
     persona, userProfile, initialHistory: conversationHistory
   });
 
   const chatEndRef = useRef(null);
 
-  // Auto-scroll
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history, isLoading, inputText]);
 
-  // Auto-end when AI signals conversation is complete
   useEffect(() => {
-    if (isCompleted) {
-      handleEndSession(true);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (isCompleted) handleEndSession(true);
   }, [isCompleted]);
 
-  // Called by Whisper hook when transcription is ready
-  const onTranscript = (text) => {
-    setInputText(prev => {
-      // Append to existing text if already has content (useful if user records twice)
-      if (prev.trim()) return prev + ' ' + text;
-      return text;
-    });
-  };
-
-  const {
-    isRecording,
-    isTranscribing,
-    isBusy,
-    error: micError,
-    setError: setMicError,
-    startRecording,
-    stopRecording,
-  } = useWhisperInput(onTranscript);
-
-  // Cleanup mic error after a few seconds
+  // Sync health and sensitive topics to pause reason
   useEffect(() => {
-    if (micError) {
-      const t = setTimeout(() => setMicError(null), 5000);
-      return () => clearTimeout(t);
+    if (isPaused && healthScore < 50) {
+      setPauseReason('Session stability has dropped. Take a moment to reground.');
     }
-  }, [micError, setMicError]);
+  }, [isPaused, healthScore]);
+
+  const onTranscript = (text) => setInputText(prev => prev.trim() ? prev + ' ' + text : text);
+  const { isRecording, isTranscribing, error: micError, startRecording, stopRecording } = useWhisperInput(onTranscript);
 
   const handleSend = () => {
     if (isRecording) stopRecording();
-
     const trimmed = inputText.trim();
-    if (!trimmed || isLoading) return;
+    if (!trimmed || isLoading || isPaused) return;
 
-    if (checkDistress(trimmed)) setShowDistress(true);
-    if (!checkLength(trimmed)) { setShowLengthError(true); return; }
-    setShowLengthError(false);
+    // CLIENT-SIDE GUARDRAILS
+    if (checkSensitiveTopics(trimmed)) {
+      setPauseReason('You mentioned a high-compliance topic. Groundwork recommends involving HR or legal counsel.');
+      setIsPaused(true);
+      return;
+    }
+    if (checkDistress(trimmed)) {
+      setPauseReason('Let’s take a breath. The simulation is getting a bit heated/stuck.');
+      setIsPaused(true);
+      return;
+    }
+    if (!checkLength(trimmed)) return;
 
     setInputText('');
     sendUserMessage(trimmed);
@@ -74,7 +61,6 @@ function Simulation({ appState, setAppState }) {
   };
 
   const handleEndSession = (isAutoEnd = false) => {
-    if (isRecording) stopRecording();
     setAppState(prev => ({
       ...prev,
       conversationHistory: history,
@@ -83,366 +69,158 @@ function Simulation({ appState, setAppState }) {
     }));
   };
 
-  // ------- Mic button state machine -------
-  // State: idle → recording → transcribing → idle
-  const getMicState = () => {
-    if (isTranscribing) return 'transcribing';
-    if (isRecording)    return 'recording';
-    return 'idle';
-  };
-  const micState = getMicState();
-
-  const micLabel = {
-    idle:         'Hold to speak',
-    recording:    'Recording… click to stop',
-    transcribing: 'Transcribing…',
-  }[micState];
-
-  const micButtonStyle = {
-    idle: {
-      background: '#1E1E1E', color: '#C8B89A',
-      border: '1px solid #3A3A3A', cursor: 'pointer',
-      boxShadow: 'none', animation: 'none',
-    },
-    recording: {
-      background: '#C86060', color: '#FFF',
-      border: '2px solid #FF8080', cursor: 'pointer',
-      boxShadow: '0 0 0 6px rgba(200,96,96,0.18)',
-      animation: 'mic-pulse 1.5s infinite',
-    },
-    transcribing: {
-      background: '#1E1E1E', color: '#C8B89A',
-      border: '1px solid #3A3A3A', cursor: 'not-allowed',
-      boxShadow: 'none', animation: 'none',
-    },
-  }[micState];
-
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#0F0F0F' }}>
-
-      {/* ── HEADER ── */}
-      <header style={{
-        height: '72px', flexShrink: 0,
-        background: 'rgba(15,15,15,0.9)', backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid #1E1E1E',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 24px',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{
-            width: '40px', height: '40px', borderRadius: '50%',
-            background: persona?.avatarColor || '#333',
-            color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '18px', fontWeight: '500',
-          }}>
-            {persona?.avatarInitial}
-          </div>
-          <div>
-            <div style={{ fontSize: '15px', color: '#F0EDE8', fontWeight: '500' }}>{persona?.name}</div>
-            <div style={{ fontSize: '12px', color: '#605850', marginTop: '2px' }}>{persona?.role}</div>
-          </div>
-
-          <div style={{
-            marginLeft: '24px', paddingLeft: '24px', borderLeft: '1px solid #2A2A2A',
-            display: 'flex', flexDirection: 'column', gap: '2px',
-          }}>
-            <div style={{ fontSize: '10px', color: '#605850', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Scenario</div>
-            <div style={{ fontSize: '14px', color: '#C8B89A', fontWeight: '400' }}>{userProfile.scenario || persona?.conversationType}</div>
-          </div>
-
-          {/* Attention meter */}
-          <div style={{ marginLeft: '16px', display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: '#1A1A1A', borderRadius: '8px', border: '1px solid #2A2A2A' }}>
-            <Activity size={14} color={attentionLevel > 60 ? '#4E9B6F' : attentionLevel > 30 ? '#C8B89A' : '#C86060'} />
-            <div style={{ width: '48px', height: '4px', background: '#2A2A2A', borderRadius: '2px', overflow: 'hidden' }}>
-              <div style={{
-                height: '100%',
-                width: `${attentionLevel || 0}%`,
-                background: attentionLevel > 60 ? '#4E9B6F' : attentionLevel > 30 ? '#C8B89A' : '#C86060',
-                transition: 'all 0.5s ease',
-              }} />
+    <div style={{ height: '100%', display: 'flex', background: '#090909', color: '#F0EDE8' }}>
+      
+      {/* ── LEFT: CHAT AREA (75%) ── */}
+      <section style={{ flex: 3, display: 'flex', flexDirection: 'column', borderRight: '1px solid #1A1A1A' }}>
+        
+        {/* Header */}
+        <header style={{ height: '72px', borderBottom: '1px solid #1A1A1A', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#111' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: persona?.avatarColor || '#333', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '700' }}>{persona?.avatarInitial}</div>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '600' }}>{persona?.name}</div>
+              <div style={{ fontSize: '10px', color: '#505050', textTransform: 'uppercase' }}>{persona?.role}</div>
             </div>
-            <span style={{ fontSize: '11px', color: '#605850' }}>ATTN</span>
           </div>
-        </div>
+          <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ background: 'none', border: 'none', color: '#404040', cursor: 'pointer' }}><X size={20} /></button>
+        </header>
 
-        {/* Right actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ fontSize: '12px', color: '#605850', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Turn {turnCount}
-          </div>
-
-          {showEndConfirm ? (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span style={{ color: '#605850', fontSize: '13px' }}>End session?</span>
-              <button onClick={() => handleEndSession()} style={{
-                background: 'transparent', border: '1px solid #C86060', color: '#C86060',
-                borderRadius: '6px', padding: '6px 12px', fontSize: '12px', cursor: 'pointer',
-              }}>Yes</button>
-              <button onClick={() => setShowEndConfirm(false)} style={{
-                background: 'transparent', border: '1px solid #3A3A3A', color: '#A09890',
-                borderRadius: '6px', padding: '6px 12px', fontSize: '12px', cursor: 'pointer',
-              }}>No</button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                title="Discard session and exit"
-                onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))}
-                style={{
-                  background: 'transparent', border: '1px solid #2A2A2A', color: '#A09890',
-                  borderRadius: '8px', padding: '8px', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}
-                onMouseOver={e => { e.currentTarget.style.color = '#F0EDE8'; e.currentTarget.style.borderColor = '#3A3A3A'; }}
-                onMouseOut={e => { e.currentTarget.style.color = '#A09890'; e.currentTarget.style.borderColor = '#2A2A2A'; }}
-              >
-                <X size={16} />
-              </button>
-              <button
-                onClick={() => setShowEndConfirm(true)}
-                style={{
-                  background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#C8B89A',
-                  borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '13px',
-                }}
-              >
-                Get Feedback
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
-
-      {/* ── CHAT AREA ── */}
-      <main style={{ flex: 1, overflowY: 'auto', padding: '40px 0', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flex: 1, maxWidth: '800px', width: '100%', margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-
-          {history.length === 0 && !isLoading && (
-            <div style={{ textAlign: 'center', color: '#605850', marginTop: '40px', fontSize: '15px' }}>
-              Initializing practice environment…
-            </div>
-          )}
-
-          {history.map((msg, idx) => {
-            const isPersona = msg.role === 'model';
-            return isPersona ? (
-              <div key={idx} className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
-                <div style={{ fontSize: '11px', color: '#605850', textTransform: 'uppercase', letterSpacing: '0.06em', marginLeft: '4px' }}>
-                  {persona?.name}
-                </div>
-                <div style={{ fontSize: '22px', color: '#F0EDE8', lineHeight: '1.5', fontWeight: '300', maxWidth: '680px' }}>
-                  "{msg.content}"
-                </div>
-              </div>
-            ) : (
-              <div key={idx} className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-end', alignSelf: 'flex-end' }}>
-                <div style={{ fontSize: '11px', color: '#A09890', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '4px' }}>
-                  You
-                </div>
-                <div style={{
-                  fontSize: '15px', color: '#E0DCD5', lineHeight: '1.5',
-                  maxWidth: '500px', background: '#1A1A1A',
-                  padding: '12px 20px', borderRadius: '16px 16px 4px 16px',
-                  border: '1px solid #2A2A2A',
+        {/* Messages */}
+        <main style={{ flex: 1, overflowY: 'auto', padding: '40px 0' }}>
+          <div style={{ maxWidth: '640px', margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            {history.map((msg, idx) => (
+              <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: msg.role === 'model' ? 'flex-start' : 'flex-end', animation: 'fadeIn 0.4s' }}>
+                <span style={{ fontSize: '11px', color: '#404040', textTransform: 'uppercase' }}>{msg.role === 'model' ? persona?.name : 'You'}</span>
+                <div style={{ 
+                  fontSize: msg.role === 'model' ? '20px' : '15px', 
+                  color: msg.role === 'model' ? '#F0EDE8' : '#D1C8B8',
+                  lineHeight: '1.5',
+                  maxWidth: '520px',
+                  fontWeight: msg.role === 'model' ? '300' : '400',
+                  padding: msg.role === 'model' ? '0' : '12px 18px',
+                  background: msg.role === 'model' ? 'transparent' : '#111',
+                  borderRadius: '16px 16px 4px 16px',
+                  border: msg.role === 'model' ? 'none' : '1px solid #1A1A1A'
                 }}>
-                  {msg.content}
+                  {msg.role === 'model' ? `"${msg.content}"` : msg.content}
                 </div>
               </div>
-            );
-          })}
-
-          {/* AI typing indicator */}
-          {isLoading && (
-            <div className="animate-in" style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-              <div style={{
-                background: 'rgba(26,26,26,0.5)', border: '1px solid #242424',
-                borderRadius: '20px', padding: '12px 24px', display: 'flex', gap: '6px', alignItems: 'center',
-              }}>
-                <span className="dot" style={{ width: '6px', height: '6px' }} />
-                <span className="dot" style={{ width: '6px', height: '6px' }} />
-                <span className="dot" style={{ width: '6px', height: '6px' }} />
-              </div>
-            </div>
-          )}
-
-          {/* ── TRANSCRIPT PANEL ── */}
-          {(inputText || isRecording || isTranscribing) && (
-            <div style={{
-              marginTop: 'auto',
-              background: '#131313',
-              border: `1px solid ${isRecording ? '#C86060' : isTranscribing ? '#C8B89A44' : '#2A2A2A'}`,
-              borderRadius: '16px', padding: '20px 24px',
-              transition: 'border-color 0.4s',
-            }}>
-
-              {/* Status row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: isRecording ? '20px' : '14px' }}>
-                {isRecording && (
-                  <>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#C86060', flexShrink: 0, animation: 'mic-pulse 1.5s infinite' }} />
-                    <span style={{ fontSize: '11px', color: '#C86060', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: '600' }}>Recording</span>
-                    <span style={{ fontSize: '11px', color: '#3A3A3A', marginLeft: 'auto' }}>Click stop when done</span>
-                  </>
-                )}
-                {isTranscribing && (
-                  <>
-                    <Loader2 size={14} color="#C8B89A" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
-                    <span style={{ fontSize: '11px', color: '#C8B89A', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: '600' }}>Transcribing with Whisper…</span>
-                  </>
-                )}
-                {!isRecording && !isTranscribing && inputText && (
-                  <>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4E9B6F', flexShrink: 0 }} />
-                    <span style={{ fontSize: '11px', color: '#4E9B6F', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: '600' }}>Transcript Ready</span>
-                    <span style={{ fontSize: '11px', color: '#3A3A3A', marginLeft: 'auto' }}>Edit or press Enter to send</span>
-                  </>
-                )}
-              </div>
-
-              {/* Body */}
-              {isRecording && (
-                // Animated waveform bars — no text, no noise
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '36px' }}>
-                  {[0.4, 0.7, 1, 0.6, 0.9, 0.5, 0.8, 0.45, 0.75, 1, 0.5, 0.65].map((h, i) => (
-                    <div key={i} style={{
-                      flex: 1, background: '#C86060', borderRadius: '3px',
-                      height: `${h * 100}%`, opacity: 0.6,
-                      animation: `wave ${0.8 + i * 0.1}s ease-in-out ${i * 0.07}s infinite alternate`,
-                    }} />
-                  ))}
-                </div>
-              )}
-
-              {isTranscribing && (
-                <div style={{ fontSize: '15px', color: '#3A3A3A', fontStyle: 'italic', lineHeight: '1.5' }}>
-                  Processing audio with Whisper…
-                </div>
-              )}
-
-              {!isRecording && !isTranscribing && inputText && (
-                <div style={{ fontSize: '18px', color: '#F0EDE8', lineHeight: '1.65' }}>
-                  {inputText}
-                </div>
-              )}
-            </div>
-          )}
-
-          <style>{`
-            @keyframes wave {
-              from { transform: scaleY(0.3); }
-              to   { transform: scaleY(1); }
-            }
-          `}</style>
-
-          <div ref={chatEndRef} />
-        </div>
-      </main>
-
-      {/* ── ERROR BANNERS ── */}
-      <div style={{ position: 'fixed', bottom: '160px', left: 0, right: 0, zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', pointerEvents: 'none' }}>
-        {(errorObj || micError) && (
-          <div style={{
-            pointerEvents: 'auto',
-            background: '#1A1A1A', border: '1px solid #C86060', color: '#C86060',
-            borderRadius: '10px', padding: '12px 20px', fontSize: '13px',
-            maxWidth: '500px', display: 'flex', alignItems: 'center', gap: '12px',
-          }}>
-            <span>{micError || errorObj?.message || errorObj}</span>
-            <button
-              onClick={() => { setErrorObj(null); setMicError(null); }}
-              style={{ background: 'none', border: 'none', color: '#C86060', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}
-            >×</button>
+            ))}
+            <div ref={chatEndRef} />
           </div>
-        )}
-        {showLengthError && (
-          <div style={{ pointerEvents: 'auto', background: '#1A1A1A', border: '1px solid #C89A4E', color: '#C89A4E', borderRadius: '10px', padding: '12px 20px', fontSize: '13px' }}>
-            Please say a full sentence before sending.
-          </div>
-        )}
-      </div>
+        </main>
 
-      {/* ── CONTROLS FOOTER ── */}
-      <footer style={{
-        background: 'rgba(15,15,15,0.95)', backdropFilter: 'blur(12px)',
-        borderTop: '1px solid #1E1E1E', padding: '20px 24px',
-        flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px',
-      }}>
-
-        {/* Text input row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', maxWidth: '640px' }}>
-          <input
-            autoFocus
-            type="text"
-            value={inputText}
-            onChange={e => setInputText(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !isTranscribing) handleSend(); }}
-            placeholder={isTranscribing ? 'Transcribing with Whisper…' : 'Type your response or use the mic below…'}
-            disabled={isTranscribing || isRecording}
-            style={{
-              flex: 1, background: '#1A1A1A',
-              border: `1px solid ${isTranscribing ? '#3A3A3A' : '#2A2A2A'}`,
-              color: isTranscribing ? '#605850' : '#F0EDE8',
-              padding: '12px 16px', borderRadius: '8px',
-              outline: 'none', fontSize: '15px',
-              transition: 'all 0.2s',
-            }}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!inputText.trim() || isLoading || isTranscribing || isRecording}
-            style={{
-              background: inputText.trim() && !isLoading && !isBusy ? '#C8B89A' : '#1A1A1A',
-              color: inputText.trim() && !isLoading && !isBusy ? '#0F0F0F' : '#605850',
-              border: 'none',
-              cursor: inputText.trim() && !isLoading && !isBusy ? 'pointer' : 'not-allowed',
-              padding: '12px 20px', borderRadius: '8px',
-              transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500',
-            }}
-          >
-            Send <Navigation2 size={16} />
-          </button>
-        </div>
-
-        {/* Mic row */}
-        <div style={{ position: 'relative', width: '100%', maxWidth: '640px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
-          <div style={{ flex: 1, height: '1px', background: '#1E1E1E' }} />
-
-          {/* Mic button */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-            <button
-              onClick={micState === 'recording' ? stopRecording : micState === 'idle' ? startRecording : undefined}
-              disabled={isLoading || isTranscribing}
-              style={{
-                width: '56px', height: '56px', borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.25s', ...micButtonStyle,
-              }}
-              onMouseOver={e => { if (micState === 'idle') { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.background = '#2A2A2A'; } }}
-              onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; if (micState === 'idle') e.currentTarget.style.background = '#1E1E1E'; }}
+        {/* Input */}
+        <footer style={{ padding: '24px', background: '#0D0D0D', borderTop: '1px solid #1A1A1A' }}>
+          <div style={{ maxWidth: '640px', margin: '0 auto', display: 'flex', gap: '12px' }}>
+            <input 
+              value={inputText} 
+              onChange={e => setInputText(e.target.value)} 
+              onKeyDown={e => e.key === 'Enter' && handleSend()}
+              placeholder={isPaused ? "Simulation Paused" : "What is your next move?"}
+              disabled={isPaused || isLoading}
+              style={{ flex: 1, background: '#131313', border: '1px solid #222', padding: '14px 18px', borderRadius: '10px', color: '#F0EDE8', outline: 'none' }}
+            />
+            <button 
+              onClick={handleSend}
+              disabled={isPaused || !inputText.trim() || isLoading}
+              style={{ background: inputText.trim() && !isLoading ? '#C8B89A' : '#1A1A1A', color: inputText.trim() && !isLoading ? '#090909' : '#444', border: 'none', padding: '0 20px', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              {isTranscribing
-                ? <Loader2 size={22} style={{ animation: 'spin 1s linear infinite' }} />
-                : isRecording
-                ? <Square size={20} fill="currentColor" />
-                : <Mic size={22} />}
+              Send <Navigation2 size={16} />
             </button>
-
-            {/* Status label under mic */}
-            <span style={{
-              fontSize: '10px', letterSpacing: '0.06em', textTransform: 'uppercase',
-              color: isRecording ? '#C86060' : isTranscribing ? '#C8B89A' : '#3A3A3A',
-              transition: 'color 0.3s',
-            }}>
-              {micLabel}
-            </span>
+            <button 
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={isPaused || isLoading}
+              style={{ background: isRecording ? '#C86060' : '#1A1A1A', color: isRecording ? '#FFF' : '#C8B89A', border: 'none', padding: '0 16px', borderRadius: '10px', cursor: 'pointer' }}
+            >
+              {isRecording ? <Square size={18} fill="currentColor" /> : <Mic size={20} />}
+            </button>
           </div>
+        </footer>
+      </section>
 
-          <div style={{ flex: 1, height: '1px', background: '#1E1E1E' }} />
+      {/* ── RIGHT: COACH CONSOLE (25%) ── */}
+      <aside style={{ flex: 1, background: '#0D0D0D', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: '40px' }}>
+        
+        {/* Health Watchdog */}
+        <section>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Gauge size={14} color="#C8B89A" />
+              <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#505050' }}>Session Stability</span>
+            </div>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: healthScore < 60 ? '#C86060' : '#4E9B6F' }}>{healthScore}%</span>
+          </div>
+          <div style={{ height: '4px', background: '#1A1A1A', borderRadius: '2px', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${healthScore}%`, background: healthScore < 60 ? '#C86060' : '#4E9B6F', transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }} />
+          </div>
+          {healthScore < 70 && (
+            <p style={{ fontSize: '11px', color: '#C86060', marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <AlertTriangle size={12} /> Stance shift detected. Reground your delivery.
+            </p>
+          )}
+        </section>
+
+        {/* Live Coaching Panel */}
+        <section style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
+            <Info size={14} color="#C8B89A" />
+            <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#505050' }}>Tactical Guidance</span>
+          </div>
+          <div style={{ color: '#C8B89A', fontSize: '15px', lineHeight: '1.6', fontStyle: 'italic', background: 'rgba(200,184,154,0.04)', padding: '24px', borderRadius: '16px', borderLeft: '3px solid #C8B89A' }}>
+            {isLoading ? (
+               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                 <Loader2 size={14} className="spin" /> <span>Observing your approach...</span>
+               </div>
+            ) : (coachingAside || "The counterpart has opened. Focus on articulating your value clearly.")}
+          </div>
+        </section>
+
+        {/* Calibration Stance */}
+        <section style={{ borderTop: '1px solid #1A1A1A', paddingTop: '32px' }}>
+          <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#505050', marginBottom: '16px' }}>Current Stance</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+              <span style={{ color: '#404040' }}>Power Dynamic</span>
+              <span style={{ color: '#F0EDE8' }}>{userProfile.powerDynamic}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+              <span style={{ color: '#404040' }}>Stress</span>
+              <span style={{ color: userProfile.stressLevel > 80 ? '#C86060' : '#F0EDE8' }}>{userProfile.stressLevel > 80 ? 'Critical' : 'Balanced'}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+              <span style={{ color: '#404040' }}>Counterpart</span>
+              <span style={{ color: userProfile.counterpartDisposition === 'Hostile' ? '#C86060' : '#4E9B6F' }}>{userProfile.counterpartDisposition}</span>
+            </div>
+          </div>
+        </section>
+
+        <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ width: '100%', padding: '14px', background: 'transparent', border: '1px solid #1A1A1A', color: '#505050', borderRadius: '12px', fontSize: '12px', cursor: 'pointer', marginTop: 'auto' }}>End Practice Ready</button>
+      </aside>
+
+      {/* ── STRATEGIC PAUSE OVERLAY ── */}
+      {isPaused && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,15,15,0.95)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ maxWidth: '480px', background: '#111', border: '1px solid #1A1A1A', borderRadius: '28px', padding: '48px', textAlign: 'center' }}>
+            <ShieldCheck size={56} color="#C8B89A" style={{ margin: '0 auto 28px' }} />
+            <h2 style={{ fontSize: '26px', fontWeight: '300', marginBottom: '16px' }}>Strategic Pause</h2>
+            <p style={{ color: '#605850', fontSize: '15px', lineHeight: '1.6', marginBottom: '40px' }}>
+              {pauseReason || "The simulation has been paused to maintain a focused learning environment. Our guardrails detected a shift in session stability or high-compliance topics."}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button onClick={() => { setIsPaused(false); setPauseReason(null); }} style={{ width: '100%', padding: '18px', background: '#C8B89A', color: '#000', border: 'none', borderRadius: '14px', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>Resume Simulation</button>
+              <button onClick={() => handleEndSession()} style={{ width: '100%', padding: '16px', background: 'transparent', color: '#505050', border: '1px solid #1A1A1A', borderRadius: '14px', cursor: 'pointer' }}>View Early Debrief</button>
+            </div>
+          </div>
         </div>
-      </footer>
+      )}
 
-      {/* Spinner keyframe — injected inline via a style tag */}
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .spin { animation: spin 1.2s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
