@@ -108,7 +108,7 @@ export function CoachingBrief({ appState, setAppState }) {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                 <Zap size={14} color="#C8B89A" />
-                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#606060' }}>Power Dynamic</span>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#606060' }}>Who has more authority in this conversation?</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', background: '#0A0A0A', padding: '4px', borderRadius: '10px' }}>
                 {['Less Power', 'Equal', 'More Power'].map(opt => (

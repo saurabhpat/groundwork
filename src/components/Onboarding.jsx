@@ -173,6 +173,7 @@ function FinalScreen({ finalProfile, onLaunch, isLoading, error }) {
         {[
           { label: 'Scenario', value: finalProfile.scenario },
           { label: 'Talking To', value: finalProfile.relationshipContext },
+          { label: 'Specific Context', value: finalProfile.actualSituation },
           { label: 'Core Fear', value: finalProfile.communicationFear },
           { label: 'Experience', value: finalProfile.experienceLevel === 'never' ? 'First attempt' : finalProfile.experienceLevel === 'tried_failed' ? "Tried before — didn't go well" : 'Ongoing — but it costs you' },
           { label: 'What You Want', value: finalProfile.practiceGoal },
@@ -238,6 +239,7 @@ export function Onboarding({ appState, setAppState }) {
           scenario: finalProfile.scenario,
           relationshipContext: finalProfile.relationshipContext,
           communicationFear: finalProfile.communicationFear,
+          actualSituation: finalProfile.actualSituation,
           experienceLevel: finalProfile.experienceLevel,
           practicePhase: 1, // will be confirmed/updated by CoachingBrief
         },

@@ -16,10 +16,11 @@ export function useConversation({ persona, userProfile, initialHistory }) {
   const initialized = useRef(false);
 
   // Calibration context from user profile
-  const { powerDynamic, stressLevel, counterpartDisposition, practicePhase } = userProfile || {};
-
   const getSystemPrompt = () => {
+    const { powerDynamic, stressLevel, counterpartDisposition, practicePhase } = userProfile || {};
+    
     const richContext = userProfile?.relationshipContext ? `RELATIONSHIP DYNAMIC: The user is speaking with their ${userProfile.relationshipContext}.\nSPECIFIC FEAR: ${userProfile.communicationFear}` : '';
+    const actualContext = userProfile?.actualSituation ? `USER'S SPECIFIC SITUATION: ${userProfile.actualSituation}` : '';
 
     const calibrationPrompt = `
 SIMULATION CALIBRATION:
@@ -50,6 +51,7 @@ GROUNDWORK GUARDRAILS:
 PERSONALITY: ${persona?.personality}. ${persona?.personalityDescription}
 YOUR BACKSTORY: ${persona?.backstory}
 THE USER: ${userProfile?.whoAreYou}. GOAL: ${userProfile?.practiceGoal}
+${actualContext}
 ${calibrationPrompt}${richContext}${phaseContext}${guardrailsPrompt}
 
 YOU MUST REPLY WITH A JSON OBJECT ONLY:

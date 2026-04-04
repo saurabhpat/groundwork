@@ -75,15 +75,28 @@ export const ONBOARDING_STEPS = [
     ],
     placeholder: "Something specific I'm hoping for…",
   },
+  {
+    id: 'actual_scenario',
+    message: "In your own words, what is happening?",
+    hint: "Describe your last difficult conversation or the specific situation you're facing. This is the 'golden' input for the AI.",
+    isMulti: false,
+    suggestions: [
+      "I need to ask for a raise after my last review",
+      "A teammate keeps missing deadlines and it's affecting me",
+      "My manager keeps changing priorities every week",
+      "I'm nervous about giving feedback to a senior leader",
+    ],
+    placeholder: "Type or use voice to describe your specific situation...",
+  },
 ];
 
 // ─── Synthesis prompt — runs once after all 5 answers ────────────────────────
 const SYNTHESIS_SYSTEM_PROMPT = `You are a scenario analyst for Groundwork, a professional conversation-coaching platform.
-A user has just completed a 5-step onboarding. Based on their answers, synthesise their coaching profile.
+A user has just completed an onboarding with 6 steps. Based on their answers, synthesise their coaching profile.
 
 RULES — STRICT:
 - Do NOT invent any detail not supported by the user's answers.
-- Do NOT add demographic assumptions or industry details they did not mention.
+- "actualSituation" is the raw, specific context from the user; preserve its core detail.
 - Map their situation to EXACTLY ONE of these 8 archetypes:
   Salary Negotiation | Asking for a Promotion | Giving Difficult Feedback | Conflict with a Peer | Disagreeing with a Manager | Delivering Bad News | Client Negotiation | Setting a Boundary
 - "experienceLevel" must be exactly one of: "never" | "tried_failed" | "regular_but_costly"
@@ -98,6 +111,7 @@ OUTPUT SCHEMA:
   "scenario": "exactly one of the 8 archetypes",
   "relationshipContext": "string",
   "communicationFear": "string",
+  "actualSituation": "string (the user's specific raw input from step 6)",
   "experienceLevel": "never | tried_failed | regular_but_costly"
 }`;
 

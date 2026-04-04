@@ -126,7 +126,7 @@ export function Profile({ appState, setAppState }) {
             <TrendingUp size={160} color="#C8B89A" />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#C8B89A', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px', fontWeight: '600' }}>
-            <UserCheck size={14} /> High-Level Marker Analysis
+            <UserCheck size={14} /> How your sessions are going
           </div>
           <div style={{ maxWidth: '600px', fontSize: '16px', color: '#F0EDE8', lineHeight: '1.6', fontWeight: '300' }}>
             {sessions.length < 3 
@@ -154,7 +154,7 @@ export function Profile({ appState, setAppState }) {
 
         {/* ANALYTICAL HISTORY */}
         <div>
-          <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#605850', marginBottom: '24px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Analytical History</h3>
+          <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#605850', marginBottom: '24px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your practice history</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {sessions.slice().reverse().map((s) => (
               <div 

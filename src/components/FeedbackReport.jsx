@@ -215,6 +215,84 @@ ${formattedTranscript}`;
         </div>
 
 
+        {/* NPS FEEDBACK WIDGET */}
+        <div style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: '20px', padding: '40px', marginBottom: '64px', textAlign: 'center' }}>
+          {!reactionData.rating ? (
+            <>
+              <h3 style={{ fontSize: '18px', fontWeight: '300', marginBottom: '24px' }}>How was this practice session for you?</h3>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '32px' }}>
+                <button 
+                  onClick={() => setReactionData({ rating: 'up', reason: '' })}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', transition: 'transform 0.2s' }}
+                  onMouseOver={e => e.currentTarget.style.transform = 'scale(1.2)'}
+                  onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(78,155,111,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Zap size={28} color="#4E9B6F" />
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#4E9B6F', marginTop: '12px', textTransform: 'uppercase' }}>Helpful</div>
+                </button>
+                <button 
+                  onClick={() => setReactionData({ rating: 'down', reason: '' })}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', transition: 'transform 0.2s' }}
+                  onMouseOver={e => e.currentTarget.style.transform = 'scale(1.2)'}
+                  onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(200,96,96,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <AlertCircle size={28} color="#C86060" />
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#C86060', marginTop: '12px', textTransform: 'uppercase' }}>Not Quite</div>
+                </button>
+              </div>
+            </>
+          ) : reactionData.rating === 'up' ? (
+            <div className="animate-in">
+              <h3 style={{ fontSize: '18px', fontWeight: '300', marginBottom: '16px' }}>Glad it helped! Which part worked best?</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px', marginBottom: '24px' }}>
+                {['Onboarding', 'Simulation', 'Coaching Feedback', 'Scenario Specificity'].map(opt => (
+                  <button 
+                    key={opt}
+                    onClick={() => setReactionData(prev => ({ ...prev, reason: opt }))}
+                    style={{ 
+                      padding: '10px 20px', borderRadius: '30px', border: `1px solid ${reactionData.reason === opt ? '#C8B89A' : '#222'}`,
+                      background: reactionData.reason === opt ? 'rgba(200,184,154,0.1)' : 'transparent',
+                      color: reactionData.reason === opt ? '#C8B89A' : '#505050',
+                      cursor: 'pointer', fontSize: '13px'
+                    }}
+                  >{opt}</button>
+                ))}
+              </div>
+              {reactionData.reason && <p style={{ color: '#4E9B6F', fontSize: '13px' }}>Thanks for the feedback! We're using this to refine the coach.</p>}
+            </div>
+          ) : (
+            <div className="animate-in">
+              <h3 style={{ fontSize: '18px', fontWeight: '300', marginBottom: '16px' }}>Where did we miss the mark?</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px', marginBottom: '24px' }}>
+                {["It wasn't realistic", "Feedback wasn't relevant", "Scenario didn't match", "Other"].map(opt => (
+                  <button 
+                    key={opt}
+                    onClick={() => setReactionData(prev => ({ ...prev, reason: opt }))}
+                    style={{ 
+                      padding: '10px 20px', borderRadius: '30px', border: `1px solid ${reactionData.reason === opt ? '#C8B89A' : '#222'}`,
+                      background: reactionData.reason === opt ? 'rgba(200,184,154,0.1)' : 'transparent',
+                      color: reactionData.reason === opt ? '#C8B89A' : '#505050',
+                      cursor: 'pointer', fontSize: '13px'
+                    }}
+                  >{opt}</button>
+                ))}
+              </div>
+              {reactionData.reason === 'Other' && (
+                <textarea 
+                  placeholder="Tell us more (max 300 words)..."
+                  maxLength={1500}
+                  style={{ width: '100%', maxWidth: '400px', height: '100px', background: '#0A0A0A', border: '1px solid #222', borderRadius: '12px', padding: '12px', color: '#F0EDE8', outline: 'none', marginBottom: '16px', fontSize: '14px' }}
+                />
+              )}
+              {reactionData.reason && <p style={{ color: '#C86060', fontSize: '13px' }}>Understood. We'll improve the realism and relevance for your next session.</p>}
+            </div>
+          )}
+        </div>
+
         {/* BOTTOM NAV */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
            <button onClick={handleReturnHome} style={{ background: 'transparent', border: '1px solid #2A2A2A', color: '#A09890', padding: '12px 32px', borderRadius: '10px', cursor: 'pointer' }}>Dashboard Home</button>

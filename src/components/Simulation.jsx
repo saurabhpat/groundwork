@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useConversation } from '../hooks/useConversation';
 import { useWhisperInput } from '../hooks/useWhisperInput';
+import { useTTS } from '../hooks/useTTS'; // New hook
 import { checkDistress, checkSensitiveTopics, checkLength } from '../utils/guardrails';
-import { Mic, Square, Navigation2, Activity, X, Loader2, Gauge, Info, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Mic, Square, Navigation2, Activity, X, Loader2, Gauge, Info, AlertTriangle, ShieldCheck, Volume2, VolumeX } from 'lucide-react';
 
 function Simulation({ appState, setAppState }) {
   const { persona, userProfile, conversationHistory } = appState;
@@ -10,12 +11,22 @@ function Simulation({ appState, setAppState }) {
   const [turnCount, setTurnCount] = useState(appState.turnCount || 0);
   const [pauseReason, setPauseReason] = useState(null);
 
+  const { speak, isMuted, toggleMute } = useTTS();
+
   const { 
     history, isLoading, errorObj, setErrorObj, sendUserMessage, 
     healthScore, coachingAside, isPaused, setIsPaused, isCompleted 
   } = useConversation({
     persona, userProfile, initialHistory: conversationHistory
   });
+
+  // TTS Trigger: Speak whenever a new model message arrives
+  useEffect(() => {
+    const lastMessage = history[history.length - 1];
+    if (lastMessage && lastMessage.role === 'model' && !isLoading) {
+      speak(lastMessage.content);
+    }
+  }, [history, isLoading, speak]);
 
   const chatEndRef = useRef(null);
 
@@ -84,7 +95,16 @@ function Simulation({ appState, setAppState }) {
               <div style={{ fontSize: '10px', color: '#505050', textTransform: 'uppercase' }}>{persona?.role}</div>
             </div>
           </div>
-          <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ background: 'none', border: 'none', color: '#404040', cursor: 'pointer' }}><X size={20} /></button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button 
+              onClick={toggleMute} 
+              style={{ background: 'none', border: 'none', color: isMuted ? '#C86060' : '#C8B89A', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', textTransform: 'uppercase' }}
+            >
+              {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              {isMuted ? 'Muted' : 'Voice On'}
+            </button>
+            <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ background: 'none', border: 'none', color: '#404040', cursor: 'pointer' }}><X size={20} /></button>
+          </div>
         </header>
 
         {/* Messages */}
@@ -183,7 +203,7 @@ function Simulation({ appState, setAppState }) {
           <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#505050', marginBottom: '16px' }}>Current Stance</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ color: '#404040' }}>Power Dynamic</span>
+              <span style={{ color: '#404040' }}>Authority Dynamic</span>
               <span style={{ color: '#F0EDE8' }}>{userProfile.powerDynamic}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>

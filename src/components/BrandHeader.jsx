@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function BrandHeader() {
+export function BrandHeader({ onClick }) {
   return (
     <div style={{
       width: '100%',
@@ -16,13 +16,19 @@ export function BrandHeader() {
       alignItems: 'center',
       gap: '4px'
     }}>
-      <div style={{
-        fontSize: '12px',
-        fontWeight: '500',
-        color: '#C8B89A',
-        letterSpacing: '0.2em',
-        textTransform: 'uppercase'
-      }}>
+      <div 
+        onClick={onClick}
+        className="brand-logo"
+        style={{
+          fontSize: '12px',
+          fontWeight: '500',
+          color: '#C8B89A',
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          cursor: onClick ? 'pointer' : 'default',
+          transition: 'opacity 0.2s'
+        }}
+      >
         Groundwork
       </div>
       <div style={{
@@ -35,6 +41,9 @@ export function BrandHeader() {
       }}>
         Strategize your uncertain high-stakes career conversations with grounded calmness and real-world practices.
       </div>
+      <style>{`
+        .brand-logo:hover { opacity: 0.7; }
+      `}</style>
     </div>
   );
 }
