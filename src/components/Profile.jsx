@@ -69,7 +69,7 @@ export function Profile({ appState, setAppState }) {
                 <div key={i} style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: '14px', padding: '20px' }}>
                   <div style={{ marginBottom: '10px' }}>{step.icon}</div>
                   <div style={{ fontSize: '13px', color: '#F0EDE8', fontWeight: '500', marginBottom: '6px' }}>{step.label}</div>
-                  <div style={{ fontSize: '12px', color: '#605850', lineHeight: '1.5' }}>{step.sub}</div>
+                  <div style={{ fontSize: '12px', color: '#808080', lineHeight: '1.5' }}>{step.sub}</div>
                 </div>
               ))}
             </div>
@@ -99,7 +99,7 @@ export function Profile({ appState, setAppState }) {
           >
             <Play size={20} fill="currentColor" /> Start Your First Practice
           </button>
-          <p style={{ fontSize: '12px', color: '#605850', margin: 0 }}>2 questions · &lt;30 seconds to start</p>
+          <p style={{ fontSize: '12px', color: '#808080', margin: 0 }}>2 questions · &lt;30 seconds to start</p>
         </div>
       </div>
     );
@@ -113,7 +113,7 @@ export function Profile({ appState, setAppState }) {
         {/* HEADER */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
           <div>
-            <div style={{ fontSize: '12px', color: '#605850', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+            <div style={{ fontSize: '12px', color: '#909090', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
               Your Performance
             </div>
             <h1 style={{ fontSize: '32px', fontWeight: '300', color: '#F0EDE8', margin: 0 }}>Progress Engine</h1>
@@ -154,7 +154,7 @@ export function Profile({ appState, setAppState }) {
 
         {/* ANALYTICAL HISTORY */}
         <div>
-          <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#605850', marginBottom: '24px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your practice history</h3>
+          <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#909090', marginBottom: '24px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your practice history</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {sessions.slice().reverse().map((s) => (
               <div 
@@ -177,13 +177,13 @@ export function Profile({ appState, setAppState }) {
                   </div>
                   <div>
                     <div style={{ color: '#F0EDE8', fontSize: '15px', fontWeight: '500', marginBottom: '4px' }}>{s.scenario}</div>
-                    <div style={{ color: '#605850', fontSize: '12px' }}>{new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {s.turns} turns</div>
+                    <div style={{ color: '#808080', fontSize: '12px' }}>{new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {s.turns} turns</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '14px', color: s.difficulty === 'Hard' ? '#C86060' : s.difficulty === 'Medium' ? '#C89A4E' : '#4E9B6F', fontWeight: '500' }}>{s.difficulty}</div>
-                    <div style={{ fontSize: '10px', color: '#605850', textTransform: 'uppercase' }}>Difficulty</div>
+                    <div style={{ fontSize: '10px', color: '#808080', textTransform: 'uppercase' }}>Difficulty</div>
                   </div>
                   <ChevronRight size={18} color="#222" />
                 </div>

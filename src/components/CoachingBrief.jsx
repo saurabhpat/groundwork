@@ -41,7 +41,7 @@ export function CoachingBrief({ appState, setAppState }) {
   const [error, setError] = useState(null);
 
   // Calibration State
-  const [powerDynamic, setPowerDynamic] = useState('Equal');
+  const [powerDynamic, setPowerDynamic] = useState('Peer');
   const [stressLevel, setStressLevel] = useState(50);
   const [disposition, setDisposition] = useState('Neutral');
 
@@ -86,10 +86,10 @@ export function CoachingBrief({ appState, setAppState }) {
   return (
     <div style={{ background: '#0F0F0F', minHeight: '100vh', display: 'flex', flexDirection: 'column', color: '#F0EDE8' }}>
       <header style={{ padding: '18px 24px', borderBottom: '1px solid #141414', display: 'flex', justifyContent: 'space-between' }}>
-        <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ background: 'none', border: 'none', color: '#404040', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', textTransform: 'uppercase' }}>
+        <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ background: 'none', border: 'none', color: '#808080', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', textTransform: 'uppercase' }}>
           <LayoutDashboard size={14} /> Dashboard
         </button>
-        <span style={{ fontSize: '11px', color: '#303030', textTransform: 'uppercase' }}>Coaching Brief</span>
+        <span style={{ fontSize: '11px', color: '#808080', textTransform: 'uppercase' }}>Coaching Brief</span>
         <div style={{ width: '80px' }} />
       </header>
 
@@ -98,7 +98,7 @@ export function CoachingBrief({ appState, setAppState }) {
           
           <div className="animate-in">
             <h1 style={{ fontSize: '28px', fontWeight: '300', marginBottom: '8px' }}>Prepare for Impact.</h1>
-            <p style={{ color: '#606060', fontSize: '15px' }}>Calibrate the simulation to match your real-world challenge.</p>
+            <p style={{ color: '#909090', fontSize: '15px' }}>Calibrate the simulation to match your real-world challenge.</p>
           </div>
 
           {/* CALIBRATION PANEL (Screenshot 2 Style) */}
@@ -108,14 +108,14 @@ export function CoachingBrief({ appState, setAppState }) {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                 <Zap size={14} color="#C8B89A" />
-                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#606060' }}>Who has more authority in this conversation?</span>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#909090' }}>Who has more authority in this conversation?</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', background: '#0A0A0A', padding: '4px', borderRadius: '10px' }}>
-                {['Less Power', 'Equal', 'More Power'].map(opt => (
+                {['Junior/Associate', 'Peer', 'Manager/Supervisor'].map(opt => (
                   <button key={opt} onClick={() => setPowerDynamic(opt)} style={{
                     padding: '10px', borderRadius: '8px', border: 'none', fontSize: '13px', cursor: 'pointer',
                     background: powerDynamic === opt ? '#1E1E1E' : 'transparent',
-                    color: powerDynamic === opt ? '#C8B89A' : '#404040',
+                    color: powerDynamic === opt ? '#C8B89A' : '#808080',
                     transition: '0.2s'
                   }}>{opt}</button>
                 ))}
@@ -127,14 +127,14 @@ export function CoachingBrief({ appState, setAppState }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Activity size={14} color="#C8B89A" />
-                  <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#606060' }}>Stress Level</span>
+                  <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#909090' }}>Stress Level</span>
                 </div>
                 <span style={{ fontSize: '12px', color: '#C8B89A', fontWeight: '600' }}>{stressLevel > 80 ? 'Critical' : stressLevel > 50 ? 'High' : stressLevel > 20 ? 'Medium' : 'Low'}</span>
               </div>
               <input type="range" min="0" max="100" value={stressLevel} onChange={e => setStressLevel(parseInt(e.target.value))} style={{
                 width: '100%', accentColor: '#C8B89A', height: '4px', cursor: 'pointer'
               }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '10px', color: '#303030', textTransform: 'uppercase' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '10px', color: '#707070', textTransform: 'uppercase' }}>
                 <span>Low</span><span>Critical</span>
               </div>
             </div>
@@ -143,7 +143,7 @@ export function CoachingBrief({ appState, setAppState }) {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                 <UserCircle size={14} color="#C8B89A" />
-                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#606060' }}>Counterpart Disposition</span>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#909090' }}>Counterpart Disposition</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {['Receptive', 'Neutral', 'Defensive', 'Hostile'].map(opt => (
@@ -151,7 +151,7 @@ export function CoachingBrief({ appState, setAppState }) {
                     padding: '12px', borderRadius: '10px', fontSize: '13px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px',
                     background: disposition === opt ? 'rgba(200,184,154,0.06)' : '#0A0A0A',
                     border: `1px solid ${disposition === opt ? '#C8B89A' : '#1A1A1A'}`,
-                    color: disposition === opt ? '#F0EDE8' : '#505050',
+                    color: disposition === opt ? '#F0EDE8' : '#808080',
                     transition: '0.2s'
                   }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: disposition === opt ? (opt === 'Hostile' ? '#C86060' : '#4E9B6F') : '#2A2A2A' }} />
@@ -162,19 +162,9 @@ export function CoachingBrief({ appState, setAppState }) {
             </div>
           </section>
 
-          {/* ORIGINAL BRIEF CONTENT */}
-          {content && (
-            <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              <div style={{ padding: '20px', background: '#131313', borderLeft: '3px solid #C8B89A', borderRadius: '0 8px 8px 0' }}>
-                <span style={{ fontSize: '10px', color: '#505050', textTransform: 'uppercase' }}>Key Insight</span>
-                <p style={{ fontSize: '16px', color: '#C8B89A', fontStyle: 'italic', marginTop: '8px' }}>"{content.key_principle}"</p>
-              </div>
-            </div>
-          )}
-
           {/* PHASE CARDS */}
           <div className="animate-in">
-             <div style={{ fontSize: '11px', color: '#404040', textTransform: 'uppercase', marginBottom: '16px' }}>Practice Structure</div>
+             <div style={{ fontSize: '11px', color: '#808080', textTransform: 'uppercase', marginBottom: '16px' }}>Practice Structure</div>
              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                {PHASES.map(p => (
                  <div key={p.number} style={{
@@ -182,8 +172,8 @@ export function CoachingBrief({ appState, setAppState }) {
                    background: p.number === practicePhase ? 'rgba(200,184,154,0.04)' : 'transparent',
                    opacity: p.number > practicePhase ? 0.4 : 1
                  }}>
-                   <div style={{ fontSize: '14px', fontWeight: '500', color: p.number === practicePhase ? '#F0EDE8' : '#505050' }}>Phase {p.number} — {p.label}</div>
-                   <div style={{ fontSize: '12px', color: '#505050', marginTop: '4px' }}>{p.description}</div>
+                    <div style={{ fontSize: '14px', fontWeight: '500', color: p.number === practicePhase ? '#F0EDE8' : '#808080' }}>Phase {p.number} — {p.label}</div>
+                    <div style={{ fontSize: '12px', color: '#808080', marginTop: '4px' }}>{p.description}</div>
                  </div>
                ))}
              </div>
@@ -197,7 +187,7 @@ export function CoachingBrief({ appState, setAppState }) {
               Start Phase {practicePhase} <ArrowRight size={17} />
             </button>
             <button onClick={() => launchSimulation(true)} style={{
-              width: '100%', padding: '14px', background: 'transparent', color: '#505050', border: '1px solid #1E1E1E', borderRadius: '12px', fontSize: '13px', cursor: 'pointer'
+              width: '100%', padding: '14px', background: 'transparent', color: '#808080', border: '1px solid #1E1E1E', borderRadius: '12px', fontSize: '13px', cursor: 'pointer'
             }}>Skip to Full Simulation</button>
           </div>
 

@@ -92,7 +92,7 @@ function Simulation({ appState, setAppState }) {
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: persona?.avatarColor || '#333', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '700' }}>{persona?.avatarInitial}</div>
             <div>
               <div style={{ fontSize: '14px', fontWeight: '600' }}>{persona?.name}</div>
-              <div style={{ fontSize: '10px', color: '#505050', textTransform: 'uppercase' }}>{persona?.role}</div>
+              <div style={{ fontSize: '10px', color: '#808080', textTransform: 'uppercase' }}>{persona?.role}</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -103,7 +103,7 @@ function Simulation({ appState, setAppState }) {
               {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
               {isMuted ? 'Muted' : 'Voice On'}
             </button>
-            <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ background: 'none', border: 'none', color: '#404040', cursor: 'pointer' }}><X size={20} /></button>
+            <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ background: 'none', border: 'none', color: '#808080', cursor: 'pointer' }}><X size={20} /></button>
           </div>
         </header>
 
@@ -112,7 +112,7 @@ function Simulation({ appState, setAppState }) {
           <div style={{ maxWidth: '640px', margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
             {history.map((msg, idx) => (
               <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: msg.role === 'model' ? 'flex-start' : 'flex-end', animation: 'fadeIn 0.4s' }}>
-                <span style={{ fontSize: '11px', color: '#404040', textTransform: 'uppercase' }}>{msg.role === 'model' ? persona?.name : 'You'}</span>
+                <span style={{ fontSize: '11px', color: '#808080', textTransform: 'uppercase' }}>{msg.role === 'model' ? persona?.name : 'You'}</span>
                 <div style={{ 
                   fontSize: msg.role === 'model' ? '20px' : '15px', 
                   color: msg.role === 'model' ? '#F0EDE8' : '#D1C8B8',
@@ -169,7 +169,7 @@ function Simulation({ appState, setAppState }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Gauge size={14} color="#C8B89A" />
-              <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#505050' }}>Session Stability</span>
+              <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#808080' }}>Session Stability</span>
             </div>
             <span style={{ fontSize: '12px', fontWeight: '700', color: healthScore < 60 ? '#C86060' : '#4E9B6F' }}>{healthScore}%</span>
           </div>
@@ -187,7 +187,7 @@ function Simulation({ appState, setAppState }) {
         <section style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
             <Info size={14} color="#C8B89A" />
-            <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#505050' }}>Tactical Guidance</span>
+            <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#808080' }}>Tactical Guidance</span>
           </div>
           <div style={{ color: '#C8B89A', fontSize: '15px', lineHeight: '1.6', fontStyle: 'italic', background: 'rgba(200,184,154,0.04)', padding: '24px', borderRadius: '16px', borderLeft: '3px solid #C8B89A' }}>
             {isLoading ? (
@@ -200,24 +200,24 @@ function Simulation({ appState, setAppState }) {
 
         {/* Calibration Stance */}
         <section style={{ borderTop: '1px solid #1A1A1A', paddingTop: '32px' }}>
-          <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#505050', marginBottom: '16px' }}>Current Stance</div>
+          <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#808080', marginBottom: '16px' }}>Current Stance</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ color: '#404040' }}>Authority Dynamic</span>
+              <span style={{ color: '#808080' }}>Authority Dynamic</span>
               <span style={{ color: '#F0EDE8' }}>{userProfile.powerDynamic}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ color: '#404040' }}>Stress</span>
+              <span style={{ color: '#808080' }}>Stress</span>
               <span style={{ color: userProfile.stressLevel > 80 ? '#C86060' : '#F0EDE8' }}>{userProfile.stressLevel > 80 ? 'Critical' : 'Balanced'}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ color: '#404040' }}>Counterpart</span>
+              <span style={{ color: '#707070' }}>Counterpart</span>
               <span style={{ color: userProfile.counterpartDisposition === 'Hostile' ? '#C86060' : '#4E9B6F' }}>{userProfile.counterpartDisposition}</span>
             </div>
           </div>
         </section>
 
-        <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ width: '100%', padding: '14px', background: 'transparent', border: '1px solid #1A1A1A', color: '#505050', borderRadius: '12px', fontSize: '12px', cursor: 'pointer', marginTop: 'auto' }}>End Practice Ready</button>
+        <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ width: '100%', padding: '14px', background: 'transparent', border: '1px solid #1A1A1A', color: '#808080', borderRadius: '12px', fontSize: '12px', cursor: 'pointer', marginTop: 'auto' }}>End Practice Ready</button>
       </aside>
 
       {/* ── STRATEGIC PAUSE OVERLAY ── */}
@@ -226,12 +226,12 @@ function Simulation({ appState, setAppState }) {
           <div style={{ maxWidth: '480px', background: '#111', border: '1px solid #1A1A1A', borderRadius: '28px', padding: '48px', textAlign: 'center' }}>
             <ShieldCheck size={56} color="#C8B89A" style={{ margin: '0 auto 28px' }} />
             <h2 style={{ fontSize: '26px', fontWeight: '300', marginBottom: '16px' }}>Strategic Pause</h2>
-            <p style={{ color: '#605850', fontSize: '15px', lineHeight: '1.6', marginBottom: '40px' }}>
+            <p style={{ color: '#808080', fontSize: '15px', lineHeight: '1.6', marginBottom: '40px' }}>
               {pauseReason || "The simulation has been paused to maintain a focused learning environment. Our guardrails detected a shift in session stability or high-compliance topics."}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button onClick={() => { setIsPaused(false); setPauseReason(null); }} style={{ width: '100%', padding: '18px', background: '#C8B89A', color: '#000', border: 'none', borderRadius: '14px', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>Resume Simulation</button>
-              <button onClick={() => handleEndSession()} style={{ width: '100%', padding: '16px', background: 'transparent', color: '#505050', border: '1px solid #1A1A1A', borderRadius: '14px', cursor: 'pointer' }}>View Early Debrief</button>
+              <button onClick={() => handleEndSession()} style={{ width: '100%', padding: '16px', background: 'transparent', color: '#808080', border: '1px solid #1A1A1A', borderRadius: '14px', cursor: 'pointer' }}>View Early Debrief</button>
             </div>
           </div>
         </div>

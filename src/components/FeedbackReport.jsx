@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, AlertCircle, Zap, TrendingUp, Mic } from 'lucide-react';
+import { Target, AlertCircle, Zap, TrendingUp, Mic, Check } from 'lucide-react';
 import { robustGenerate } from '../utils/aiClient';
 
 export function FeedbackReport({ appState, setAppState, readOnlyReport }) {
@@ -9,7 +9,7 @@ export function FeedbackReport({ appState, setAppState, readOnlyReport }) {
   const [report, setReport] = useState(readOnlyReport || null);
   const [loading, setLoading] = useState(!readOnlyReport);
   const [errorObj, setErrorObj] = useState(null);
-  const [reactionData, setReactionData] = useState({ rating: null, reason: "" });
+  const [reactionData, setReactionData] = useState({ rating: null, reason: "", customText: "", submitted: false });
 
   useEffect(() => {
     if (isHistoryView) return;
@@ -125,18 +125,16 @@ ${formattedTranscript}`;
   };
   const handlePracticeAgain = () => setAppState(prev => ({ ...prev, phase: "onboarding", turnCount: 0, conversationHistory: [] }));
 
-
-
   return (
     <div style={{ background: '#0F0F0F', minHeight: '100vh', padding: '40px 24px 80px', color: '#F0EDE8' }}>
       <div className="animate-in" style={{ maxWidth: '900px', margin: '0 auto' }}>
         
         {/* TOP HEADER */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#A09890', fontSize: '13px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#B0B0B0', fontSize: '13px' }}>
             <TrendingUp size={16} /> Difficulty: <span style={{ color: '#F0EDE8', fontWeight: '500' }}>{report.difficulty}</span>
           </div>
-          <div style={{ fontSize: '11px', color: '#444', letterSpacing: '0.1em' }}>SN-992-DELTA</div>
+          <div style={{ fontSize: '11px', color: '#606060', letterSpacing: '0.1em' }}>PRECISION FEEDBACK ENGINE</div>
         </div>
 
         {/* TOP MARKER GRID */}
@@ -147,7 +145,7 @@ ${formattedTranscript}`;
               <h3 style={{ color: '#4E9B6F', fontSize: '15px', fontWeight: '500' }}>What Landed</h3>
               <Target size={20} color="#4E9B6F" style={{ opacity: 0.5 }} />
             </div>
-            <p style={{ fontSize: '13px', color: '#A09890', lineHeight: '1.6', marginBottom: '24px' }}>{report.what_landed.observation}</p>
+            <p style={{ fontSize: '13px', color: '#B0B0B0', lineHeight: '1.6', marginBottom: '24px' }}>{report.what_landed.observation}</p>
             <div style={{ width: '100%', height: '4px', background: '#1A1A1A', borderRadius: '2px', overflow: 'hidden', position: 'relative' }}>
               <div style={{ width: `${report.what_landed.percentage}%`, height: '100%', background: '#4E9B6F' }} />
             </div>
@@ -160,13 +158,13 @@ ${formattedTranscript}`;
               <h3 style={{ color: '#C8B89A', fontSize: '15px', fontWeight: '500' }}>Hesitation Markers</h3>
               <Mic size={20} color="#C8B89A" style={{ opacity: 0.5 }} />
             </div>
-            <p style={{ fontSize: '13px', color: '#A09890', lineHeight: '1.6', marginBottom: '24px' }}>{report.hesitation_markers.observation}</p>
+            <p style={{ fontSize: '13px', color: '#B0B0B0', lineHeight: '1.6', marginBottom: '24px' }}>{report.hesitation_markers.observation}</p>
             <div style={{ width: '100%', height: '4px', background: '#1A1A1A', borderRadius: '2px', overflow: 'hidden' }}>
               <div style={{ width: report.hesitation_markers.impact_level === 'High' ? '100%' : report.hesitation_markers.impact_level === 'Medium' ? '60%' : '30%', height: '100%', background: '#C8B89A' }} />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
               <span style={{ fontSize: '10px', color: '#C8B89A' }}>{report.hesitation_markers.count} detected</span>
-              <span style={{ fontSize: '10px', color: '#605850', textTransform: 'uppercase' }}>{report.hesitation_markers.impact_level}</span>
+              <span style={{ fontSize: '10px', color: '#808080', textTransform: 'uppercase' }}>{report.hesitation_markers.impact_level}</span>
             </div>
           </div>
 
@@ -177,23 +175,23 @@ ${formattedTranscript}`;
               <AlertCircle size={20} color="#C86060" style={{ opacity: 0.5 }} />
             </div>
             <p style={{ fontSize: '14px', color: '#F0EDE8', fontWeight: '500', marginBottom: '8px' }}>{report.one_thing_to_fix.headline}</p>
-            <p style={{ fontSize: '13px', color: '#A09890', lineHeight: '1.6', marginBottom: '20px' }}>{report.one_thing_to_fix.observation}</p>
+            <p style={{ fontSize: '13px', color: '#B0B0B0', lineHeight: '1.6', marginBottom: '20px' }}>{report.one_thing_to_fix.observation}</p>
           </div>
         </div>
 
         {/* SUGGESTED REPHRASING */}
         <div style={{ marginBottom: '64px' }}>
-          <h4 style={{ fontSize: '11px', color: '#605850', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '24px' }}>Suggested Rephrasing</h4>
+          <h4 style={{ fontSize: '11px', color: '#808080', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '24px' }}>Suggested Rephrasing</h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '24px' }}>
             <div style={{ background: '#0A0A0A', border: '1px solid #1A1A1A', borderRadius: '12px', padding: '32px', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '-10px', left: '20px', background: '#0F0F0F', padding: '0 8px', fontSize: '10px', color: '#444', textTransform: 'uppercase' }}>Your Response</div>
-              <p style={{ fontSize: '16px', color: '#605850', fontStyle: 'italic', lineHeight: '1.6', marginBottom: '32px' }}>"{report.phrasing_deep_dive.original}"</p>
+              <div style={{ position: 'absolute', top: '-10px', left: '20px', background: '#0F0F0F', padding: '0 8px', fontSize: '10px', color: '#606060', textTransform: 'uppercase' }}>Your Response</div>
+              <p style={{ fontSize: '16px', color: '#B0B0B0', fontStyle: 'italic', lineHeight: '1.6', marginBottom: '32px' }}>"{report.phrasing_deep_dive.original}"</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TrendingUp size={16} color="#C86060" style={{ transform: 'rotate(180deg)' }} />
                 </div>
                 <div>
-                   <div style={{ fontSize: '10px', color: '#605850', textTransform: 'uppercase' }}>Impact</div>
+                   <div style={{ fontSize: '10px', color: '#606060', textTransform: 'uppercase' }}>Impact</div>
                    <div style={{ fontSize: '13px', color: '#E0DCD5' }}>{report.phrasing_deep_dive.original_impact}</div>
                 </div>
               </div>
@@ -214,7 +212,6 @@ ${formattedTranscript}`;
           </div>
         </div>
 
-
         {/* NPS FEEDBACK WIDGET */}
         <div style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: '20px', padding: '40px', marginBottom: '64px', textAlign: 'center' }}>
           {!reactionData.rating ? (
@@ -222,7 +219,7 @@ ${formattedTranscript}`;
               <h3 style={{ fontSize: '18px', fontWeight: '300', marginBottom: '24px' }}>How was this practice session for you?</h3>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '32px' }}>
                 <button 
-                  onClick={() => setReactionData({ rating: 'up', reason: '' })}
+                  onClick={() => setReactionData(prev => ({ ...prev, rating: 'up', reason: '' }))}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', transition: 'transform 0.2s' }}
                   onMouseOver={e => e.currentTarget.style.transform = 'scale(1.2)'}
                   onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -233,7 +230,7 @@ ${formattedTranscript}`;
                   <div style={{ fontSize: '11px', color: '#4E9B6F', marginTop: '12px', textTransform: 'uppercase' }}>Helpful</div>
                 </button>
                 <button 
-                  onClick={() => setReactionData({ rating: 'down', reason: '' })}
+                  onClick={() => setReactionData(prev => ({ ...prev, rating: 'down', reason: '' }))}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', transition: 'transform 0.2s' }}
                   onMouseOver={e => e.currentTarget.style.transform = 'scale(1.2)'}
                   onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -245,37 +242,20 @@ ${formattedTranscript}`;
                 </button>
               </div>
             </>
-          ) : reactionData.rating === 'up' ? (
-            <div className="animate-in">
-              <h3 style={{ fontSize: '18px', fontWeight: '300', marginBottom: '16px' }}>Glad it helped! Which part worked best?</h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px', marginBottom: '24px' }}>
-                {['Onboarding', 'Simulation', 'Coaching Feedback', 'Scenario Specificity'].map(opt => (
-                  <button 
-                    key={opt}
-                    onClick={() => setReactionData(prev => ({ ...prev, reason: opt }))}
-                    style={{ 
-                      padding: '10px 20px', borderRadius: '30px', border: `1px solid ${reactionData.reason === opt ? '#C8B89A' : '#222'}`,
-                      background: reactionData.reason === opt ? 'rgba(200,184,154,0.1)' : 'transparent',
-                      color: reactionData.reason === opt ? '#C8B89A' : '#505050',
-                      cursor: 'pointer', fontSize: '13px'
-                    }}
-                  >{opt}</button>
-                ))}
-              </div>
-              {reactionData.reason && <p style={{ color: '#4E9B6F', fontSize: '13px' }}>Thanks for the feedback! We're using this to refine the coach.</p>}
-            </div>
           ) : (
             <div className="animate-in">
-              <h3 style={{ fontSize: '18px', fontWeight: '300', marginBottom: '16px' }}>Where did we miss the mark?</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: '300', marginBottom: '16px', color: reactionData.rating === 'up' ? '#4E9B6F' : '#C86060' }}>
+                {reactionData.rating === 'up' ? 'Glad it helped! Which part worked best?' : 'Where did we miss the mark?'}
+              </h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px', marginBottom: '24px' }}>
-                {["It wasn't realistic", "Feedback wasn't relevant", "Scenario didn't match", "Other"].map(opt => (
+                {(reactionData.rating === 'up' ? ['Onboarding', 'Simulation', 'Coaching Feedback', 'Scenario Specificity'] : ["It wasn't realistic", "Feedback wasn't relevant", "Scenario didn't match", "Other"]).map(opt => (
                   <button 
                     key={opt}
                     onClick={() => setReactionData(prev => ({ ...prev, reason: opt }))}
                     style={{ 
                       padding: '10px 20px', borderRadius: '30px', border: `1px solid ${reactionData.reason === opt ? '#C8B89A' : '#222'}`,
                       background: reactionData.reason === opt ? 'rgba(200,184,154,0.1)' : 'transparent',
-                      color: reactionData.reason === opt ? '#C8B89A' : '#505050',
+                      color: reactionData.reason === opt ? '#C8B89A' : '#808080',
                       cursor: 'pointer', fontSize: '13px'
                     }}
                   >{opt}</button>
@@ -285,17 +265,46 @@ ${formattedTranscript}`;
                 <textarea 
                   placeholder="Tell us more (max 300 words)..."
                   maxLength={1500}
+                  value={reactionData.customText || ""}
+                  onChange={e => setReactionData(prev => ({ ...prev, customText: e.target.value }))}
                   style={{ width: '100%', maxWidth: '400px', height: '100px', background: '#0A0A0A', border: '1px solid #222', borderRadius: '12px', padding: '12px', color: '#F0EDE8', outline: 'none', marginBottom: '16px', fontSize: '14px' }}
                 />
               )}
-              {reactionData.reason && <p style={{ color: '#C86060', fontSize: '13px' }}>Understood. We'll improve the realism and relevance for your next session.</p>}
+              {reactionData.reason && (
+                <div style={{ marginTop: '24px' }}>
+                  {!reactionData.submitted ? (
+                    <button 
+                      onClick={() => {
+                        const sessions = JSON.parse(localStorage.getItem('groundwork_sessions') || '[]');
+                        if (sessions.length > 0) {
+                          const lastSession = sessions[sessions.length - 1];
+                          lastSession.userFeedback = { 
+                            rating: reactionData.rating, 
+                            reason: reactionData.reason,
+                            text: reactionData.customText || ""
+                          };
+                          localStorage.setItem('groundwork_sessions', JSON.stringify(sessions));
+                        }
+                        setReactionData(prev => ({ ...prev, submitted: true }));
+                      }}
+                      style={{ background: '#C8B89A', color: '#000', border: 'none', padding: '12px 32px', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
+                    >
+                      Submit Review
+                    </button>
+                  ) : (
+                    <p style={{ color: '#C8B89A', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <Check size={18} /> Review Submitted. We'll use this to refine the coach.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* BOTTOM NAV */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
-           <button onClick={handleReturnHome} style={{ background: 'transparent', border: '1px solid #2A2A2A', color: '#A09890', padding: '12px 32px', borderRadius: '10px', cursor: 'pointer' }}>Dashboard Home</button>
+           <button onClick={handleReturnHome} style={{ background: 'transparent', border: '1px solid #2A2A2A', color: '#B0B0B0', padding: '12px 32px', borderRadius: '10px', cursor: 'pointer' }}>Dashboard Home</button>
            <button onClick={handlePracticeAgain} style={{ background: '#C8B89A', color: '#0F0F0F', border: 'none', padding: '12px 32px', borderRadius: '10px', cursor: 'pointer', fontWeight: '600' }}>Practice Again</button>
         </div>
 

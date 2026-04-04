@@ -33,9 +33,12 @@ export async function transcribeAudio(audioBlob) {
   return data.text || '';
 }
 
-// Models in order of fallback
+// Models in order of fallback (Based on user limits)
 const PROVIDERS = [
-  { id: 'groq', model: 'llama-3.3-70b-versatile' }
+  { id: 'groq', model: 'llama-3.3-70b-versatile' },
+  { id: 'groq', model: 'qwen/qwen3-32b' },
+  { id: 'groq', model: 'llama-3.1-8b-instant' },
+  { id: 'groq', model: 'groq/compound-mini' }
 ];
 
 function cleanJson(raw) {
@@ -47,7 +50,7 @@ function cleanJson(raw) {
 }
 
 /**
- * Unified call to Groq
+ * Unified call to Groq with Fallback chain
  */
 export async function robustGenerate({ systemInstruction, contents, thermal = 0.7 }) {
   let lastError = null;
@@ -57,7 +60,8 @@ export async function robustGenerate({ systemInstruction, contents, thermal = 0.
     throw new Error('Groq API Key is missing. Please configure it in settings.');
   }
 
-  for (const { id, model } of PROVIDERS) {
+  for (let i = 0; i < PROVIDERS.length; i++) {
+    const { id, model } = PROVIDERS[i];
     try {
       const endpoint = "https://api.groq.com/openai/v1/chat/completions";
       
@@ -66,8 +70,8 @@ export async function robustGenerate({ systemInstruction, contents, thermal = 0.
         messages: [
           ...(systemInstruction ? [{ role: "system", content: systemInstruction }] : []),
           ...contents.map(c => ({ 
-            role: c.role === 'model' ? 'assistant' : c.role, 
-            content: Array.isArray(c.parts) ? c.parts[0].text : (typeof c.content === 'string' ? c.content : JSON.stringify(c.content))
+            role: c.role === 'model' || c.role === 'assistant' ? 'assistant' : 'user', 
+            content: Array.isArray(c.parts) ? (c.parts[0].text || c.parts[0]) : (typeof c.content === 'string' ? c.content : JSON.stringify(c.content))
           }))
         ],
         temperature: thermal,
@@ -85,9 +89,23 @@ export async function robustGenerate({ systemInstruction, contents, thermal = 0.
 
       if (!res.ok) {
         const errBody = await res.text();
-        console.warn(`Groq error (${res.status}): ${errBody}`);
-        lastError = `Groq (${res.status}): ${errBody}`;
-        continue; 
+        let errorMsg = `Groq error (${res.status}): ${errBody}`;
+        
+        // Specially handle 429 Rate Limits
+        if (res.status === 429) {
+          try {
+            const parsed = JSON.parse(errBody);
+            const detail = parsed.error?.message || "Rate limit reached";
+            errorMsg = `AI Capacity Alert (429): ${detail}. Automaticaly switching to backup model...`;
+          } catch (e) {
+            errorMsg = `AI Capacity Alert (429). Automaticaly switching to backup model...`;
+          }
+        }
+
+        console.warn(`Attempt ${i+1} (${model}) failed: ${errorMsg}`);
+        lastError = errorMsg;
+        if (i < PROVIDERS.length - 1) continue; // Try next fallback
+        throw new Error(errorMsg);
       }
 
       const data = await res.json();
@@ -95,7 +113,8 @@ export async function robustGenerate({ systemInstruction, contents, thermal = 0.
 
       if (!rawContent) {
         lastError = "Groq returned empty response";
-        continue;
+        if (i < PROVIDERS.length - 1) continue;
+        throw new Error(lastError);
       }
 
       const stripped = cleanJson(rawContent);
@@ -108,11 +127,10 @@ export async function robustGenerate({ systemInstruction, contents, thermal = 0.
 
     } catch (err) {
       lastError = err.message;
-      if (model === PROVIDERS[PROVIDERS.length - 1].model) throw err;
-      console.warn(`Groq failed: ${err.message}. Retrying next...`);
+      if (i === PROVIDERS.length - 1) throw new Error(`AI Generation failed after all fallbacks. Final error: ${lastError}`);
+      console.warn(`${model} failed: ${err.message}. Retrying next...`);
     }
   }
 
   throw new Error(`AI Generation failed. Last error: ${lastError}`);
 }
-

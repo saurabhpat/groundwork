@@ -25,7 +25,7 @@ function CompletedStep({ question, answer, onEdit }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <div style={{ fontSize: '15px', color: '#3A3A3A', fontWeight: '300', lineHeight: '1.5' }}>
+      <div style={{ fontSize: '15px', color: '#808080', fontWeight: '300', lineHeight: '1.5' }}>
         {question}
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -106,7 +106,7 @@ function ActiveStep({ step, selectedOptions, customText, setCustomText, onToggle
         <div style={{ fontSize: '22px', color: '#F0EDE8', fontWeight: '300', lineHeight: '1.55', marginBottom: step.hint ? '8px' : '0' }}>
           {step.message}
         </div>
-        {step.hint && <div style={{ fontSize: '12px', color: '#505050', lineHeight: '1.5', letterSpacing: '0.01em' }}>{step.hint}</div>}
+        {step.hint && <div style={{ fontSize: '12px', color: '#808080', lineHeight: '1.5', letterSpacing: '0.01em' }}>{step.hint}</div>}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
@@ -153,7 +153,7 @@ function ActiveStep({ step, selectedOptions, customText, setCustomText, onToggle
 function SynthesisLoader() {
   return (
     <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-      <div style={{ fontSize: '20px', color: '#605850', fontWeight: '300' }}>Reading between the lines…</div>
+      <div style={{ fontSize: '20px', color: '#808080', fontWeight: '300' }}>Reading between the lines…</div>
       <div style={{ background: 'rgba(26,26,26,0.5)', border: '1px solid #1E1E1E', borderRadius: '12px', padding: '14px 20px', display: 'inline-flex', gap: '5px', alignItems: 'center' }}>
         <span className="dot" style={{ width: '6px', height: '6px' }} />
         <span className="dot" style={{ width: '6px', height: '6px' }} />
@@ -199,7 +199,7 @@ function FinalScreen({ finalProfile, onLaunch, isLoading, error }) {
       >
         {isLoading ? <><Loader2 size={17} style={{ animation: 'spin 1s linear infinite' }} />Designing your scenario…</> : <>See My Practice Brief <ArrowRight size={17} /></>}
       </button>
-      <p style={{ textAlign: 'center', fontSize: '12px', color: '#303030', lineHeight: '1.5', margin: 0 }}>
+      <p style={{ textAlign: 'center', fontSize: '12px', color: '#808080', lineHeight: '1.5', margin: 0 }}>
         We'll walk you through what to expect before starting. You can end any time.
       </p>
     </div>
@@ -260,7 +260,7 @@ export function Onboarding({ appState, setAppState }) {
         <div style={{ textAlign: 'center' }}>
           <div className="spinner" style={{ margin: '0 auto 28px' }} />
           <p style={{ color: '#F0EDE8', fontSize: '18px', fontWeight: '300' }}>Building your scenario…</p>
-          <p style={{ color: '#505050', fontSize: '13px', marginTop: '8px' }}>Designing your counterpart and opening moment.</p>
+          <p style={{ color: '#808080', fontSize: '13px', marginTop: '8px' }}>Designing your counterpart and opening moment.</p>
         </div>
       </div>
     );
@@ -272,16 +272,16 @@ export function Onboarding({ appState, setAppState }) {
       <div style={{ padding: '18px 24px 14px', flexShrink: 0, borderBottom: '1px solid #141414', background: 'rgba(15,15,15,0.9)', backdropFilter: 'blur(8px)' }}>
         <button
           onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))}
-          style={{ background: 'transparent', border: 'none', color: '#404040', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '7px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '16px', transition: 'color 0.2s', padding: 0 }}
-          onMouseOver={e => e.currentTarget.style.color = '#808080'}
-          onMouseOut={e => e.currentTarget.style.color = '#404040'}
+          style={{ background: 'transparent', border: 'none', color: '#808080', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '7px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '16px', transition: 'color 0.2s', padding: 0 }}
+          onMouseOver={e => e.currentTarget.style.color = '#B0B0B0'}
+          onMouseOut={e => e.currentTarget.style.color = '#808080'}
         >
           <LayoutDashboard size={13} /> Dashboard
         </button>
         <ProgressBar current={currentStep} total={ONBOARDING_STEPS.length} isComplete={phase === 'complete'} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-          <span style={{ fontSize: '11px', color: '#303030', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Find your scenario</span>
-          <span style={{ fontSize: '11px', color: '#303030' }}>{phase === 'complete' ? '✓ Done' : `${currentStep + 1} of ${ONBOARDING_STEPS.length}`}</span>
+          <span style={{ fontSize: '11px', color: '#808080', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Find your scenario</span>
+          <span style={{ fontSize: '11px', color: '#808080' }}>{phase === 'complete' ? '✓ Done' : `${currentStep + 1} of ${ONBOARDING_STEPS.length}`}</span>
         </div>
       </div>
 
