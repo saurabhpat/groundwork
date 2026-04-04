@@ -1,8 +1,9 @@
 # Groundwork: AI-Driven Professional Conversation Coaching
 
-Elevate your professional communication with **Groundwork**, a sophisticated simulation engine designed to help you master high-stakes interactions. Whether you're preparing for a difficult performance review, a salary negotiation, or a complex client pitch, Groundwork provides a safe, intelligent environment to practice, fail, and improve.
+**Talk to AI before talking to the real person.** 
+Groundwork is a safe space to simulate high-stakes career conversations—from salary negotiations to difficult feedback. Master your delivery in private, then walk into the real room with calm confidence.
 
-![Groundwork Simulation](https://img.shields.io/badge/Status-Beta-blue)
+![Deploy to GitHub Pages](https://github.com/saurabhpat/groundwork/actions/workflows/deploy.yml/badge.svg)
 ![React](https://img.shields.io/badge/Powered%20By-React%2018-61DAFB?logo=react)
 ![Vite](https://img.shields.io/badge/Built%20With-Vite-646CFF?logo=vite)
 ![Groq](https://img.shields.io/badge/AI-Groq%20Cloud-orange)
@@ -14,7 +15,7 @@ Elevate your professional communication with **Groundwork**, a sophisticated sim
 Groundwork transforms the coaching experience by moving beyond static advice. It uses state-of-the-art LLMs and Speech-to-Text models to create dynamic, responsive counterparties that react to your tone, strategy, and phrasing in real-time.
 
 ### 🌟 Key Features
-- **Analytical Career Onboarding:** A 5-step interactive process to define your specific professional context.
+- **Analytical Career Onboarding:** A 6-step interactive profiling process to define your specific professional context.
 - **Dynamic Simulation Engine:** Powered by `llama-3.3-70b-versatile`, providing high-fidelity conversational logic.
 - **Voice-First Interaction:** Integrated STT using Groq's high-speed `whisper-large-v3-turbo`.
 - **Real-time Performance Health:** Track session health and stress signals as you speak.
@@ -22,12 +23,36 @@ Groundwork transforms the coaching experience by moving beyond static advice. It
 
 ---
 
+## 📸 Visual Walkthrough
+
+### 1. Proposition Landing Page
+![Proposition Landing Page](images/landing.png)
+The proposition-led entry point that defines the product's mission: "Talk to AI before talking to the real person."
+
+### 2. Analytical Profile & History
+![Analytical Profile](images/profile.png)
+A high-level dashboard of past performance, providing an overview of your progress and history.
+
+### 3. Live AI Simulation
+![AI Simulation](images/simulation.png)
+The core practice engine where you engage in a realistic simulation with an AI counterparty.
+
+---
+
 ## 🛠 Tech Stack
 
-- **Frontend:** [React 18](https://reactjs.org/) + [Vite](https://vitejs.dev/)
-- **AI Infrastructure:** [Groq Cloud](https://groq.com/) (LLM: Llama 3.3, STT: Whisper Large v3 Turbo)
-- **Styling:** Custom Vanilla CSS Design System
-- **Icons:** [Lucide React](https://lucide.dev/)
+- **Frontend Framework:** React 18 SPA built with Vite for optimal performance.
+- **Styling Architecture:** Vanilla CSS design system utilizing custom premium tokens for a professional look.
+- **AI Infrastructure:** Groq Cloud for ultra-low latency inference.
+- **Models:**
+    - **LLM:** `llama-3.3-70b-versatile` (Llama 3.3).
+    - **STT:** `whisper-large-v3-turbo` (Groq Whisper).
+
+---
+
+## 🧠 Technical Deep Dive
+
+For an in-depth look at our prompt engineering, system architecture, and safety guardrails, please see the [Groundwork Architecture 1-Pager](groundwork_architecture_1pager.md).
 
 ---
 
@@ -37,7 +62,7 @@ Follow these steps to get Groundwork running on your machine:
 
 ### 1. Prerequisites
 - **Node.js:** Ensure you have Node.js installed (v18.0.0 or higher recommended). [Download Node.js](https://nodejs.org/).
-- **Groq API Key:** You will need a Groq API key to power the simulations. You can get one for free (within rate limits) at the [Groq Console](https://console.groq.com/).
+- **Groq API Key:** You will need a Groq API key to power the simulations. You can get one for free at the [Groq Console](https://console.groq.com/).
 
 ### 2. Clone the Repository
 ```bash
@@ -88,9 +113,9 @@ The output will be generated in the `dist` folder.
 
 ## 🛡 Guardrails & Safety
 
-Groundwork includes built-in safety mechanisms to ensure a professional and constructive experience:
-- **Session Health Monitoring:** Automatically identifies when a conversation is derailing.
-- **Trigger Pauses:** Detects extreme stress signals or sensitive topics and pauses the simulation.
+Groundwork includes a multi-layered safety and operational system:
+- **Session Health monitoring:** Real-time checking for distress signals and conversation quality.
+- **Trigger Pauses:** Detects extreme stress signals or sensitive topics (e.g., legal issues) and pauses the simulation.
 - **Input Filtering:** Hardcoded protection against profanity and non-professional discourse.
 
 ---
