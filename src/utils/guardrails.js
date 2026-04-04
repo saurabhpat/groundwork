@@ -13,16 +13,24 @@ const PROFANITY = [
   "fuck", "shit", "asshole", "bitch", "cunt", "faggot"
 ];
 
+// Helper to check for whole-word matches only (to avoid "nda" triggering in "standardizing")
+function hasWholeWordMatch(text, keywords) {
+  const pattern = keywords.map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  const regex = new RegExp(`\\b(${pattern})\\b`, 'i');
+  return regex.test(text);
+}
+
 export function checkDistress(text) {
-  return DISTRESS_SIGNALS.some(s => text.toLowerCase().includes(s));
+  // Phrases are safer with includes, but we'll use word boundaries for the starts/ends
+  return hasWholeWordMatch(text, DISTRESS_SIGNALS);
 }
 
 export function checkSensitiveTopics(text) {
-  return SENSITIVE_TOPICS.some(s => text.toLowerCase().includes(s));
+  return hasWholeWordMatch(text, SENSITIVE_TOPICS);
 }
 
 export function checkProfanity(text) {
-  return PROFANITY.some(s => text.toLowerCase().includes(s));
+  return hasWholeWordMatch(text, PROFANITY);
 }
 
 /**
