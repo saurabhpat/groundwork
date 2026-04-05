@@ -50,7 +50,7 @@ export const ONBOARDING_STEPS = [
   },
   {
     id: 'confidence',
-    message: "How are you feeling about this conversation right now?",
+    message: "How do you feel about having the high-stake conversation right now.",
     hint: "Be honest — there's no wrong answer here.",
     isMulti: false,
     suggestions: [
@@ -113,7 +113,18 @@ OUTPUT SCHEMA:
   "communicationFear": "string",
   "actualSituation": "string (the user's specific raw input from step 6)",
   "experienceLevel": "never | tried_failed | regular_but_costly"
-}`;
+}
+`;
+
+const SUGGESTIONS_SYSTEM_PROMPT = `You are a scenario brainstormer for Groundwork.
+Based on the user's previous answers (Goal, Blockers, Confidence), generate 4 short suggestions (max 12 words each) for their specific "what is happening" scenario.
+The suggestions should be realistic, diverse, and directly relevant to the themes they've already mentioned.
+
+Return ONLY this JSON:
+{
+  "suggestions": ["string", "string", "string", "string"]
+}
+`;
 
 export function useOnboardingChat() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -124,6 +135,7 @@ export function useOnboardingChat() {
   const [finalProfile, setFinalProfile] = useState(null);
   const [error, setError] = useState(null);
   const [isDistress, setIsDistress] = useState(false);
+  const [dynamicSuggestions, setDynamicSuggestions] = useState(null);
 
   const step = ONBOARDING_STEPS[currentStep];
   const isLastStep = currentStep === ONBOARDING_STEPS.length - 1;
@@ -196,9 +208,29 @@ export function useOnboardingChat() {
         setPhase('onboarding');
       }
     } else {
+      // Trigger background suggestion generation after Question 5 (index 4)
+      if (currentStep === 4) {
+        generateScenarioSuggestions(newCompleted);
+      }
       setCurrentStep(prev => prev + 1);
       setSelectedOptions(new Set());
       setCustomText('');
+    }
+  };
+
+  const generateScenarioSuggestions = async (priorSteps) => {
+    const answersBlock = priorSteps
+      .map((s, i) => `Step ${i + 1} — ${s.question}\nAnswer: "${s.answer}"`)
+      .join('\n\n');
+    try {
+      const data = await robustGenerate({
+        systemInstruction: SUGGESTIONS_SYSTEM_PROMPT,
+        contents: [{ role: 'user', parts: [{ text: answersBlock }] }],
+        thermal: 0.7,
+      });
+      if (data && data.suggestions) setDynamicSuggestions(data.suggestions);
+    } catch (err) {
+      console.warn("Dynamic suggestions failed:", err);
     }
   };
 
@@ -236,14 +268,19 @@ export function useOnboardingChat() {
     completedSteps,
     selectedOptions,
     customText,
-    setCustomText,
+    setCustomText: (text) => setCustomText(text.slice(0, 300)),
     phase,
     finalProfile,
     error,
     setError,
     isDistress,
     dismissDistress: () => setIsDistress(false),
-    step,
+    step: {
+      ...step,
+      suggestions: (currentStep === ONBOARDING_STEPS.length - 1 && dynamicSuggestions) 
+        ? dynamicSuggestions 
+        : step.suggestions
+    },
     isLastStep,
     toggleOption,
     submitCurrentStep,

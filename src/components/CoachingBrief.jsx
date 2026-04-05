@@ -131,11 +131,17 @@ export function CoachingBrief({ appState, setAppState }) {
                 </div>
                 <span style={{ fontSize: '12px', color: '#C8B89A', fontWeight: '600' }}>{stressLevel > 80 ? 'Critical' : stressLevel > 50 ? 'High' : stressLevel > 20 ? 'Medium' : 'Low'}</span>
               </div>
-              <input type="range" min="0" max="100" value={stressLevel} onChange={e => setStressLevel(parseInt(e.target.value))} style={{
+              <input type="range" min="1" max="4" step="1" value={stressLevel === 100 ? 4 : stressLevel === 50 ? 2 : stressLevel === 10 ? 1 : 3} onChange={e => {
+                const val = parseInt(e.target.value);
+                setStressLevel(val === 4 ? 100 : val === 3 ? 80 : val === 2 ? 50 : 10);
+              }} style={{
                 width: '100%', accentColor: '#C8B89A', height: '4px', cursor: 'pointer'
               }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '10px', color: '#707070', textTransform: 'uppercase' }}>
-                <span>Low</span><span>Critical</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', marginTop: '8px', fontSize: '9px', color: '#707070', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ textAlign: 'left' }}>Low</span>
+                <span style={{ textAlign: 'center', marginLeft: '-15%' }}>Medium</span>
+                <span style={{ textAlign: 'center', marginLeft: '15%' }}>High</span>
+                <span style={{ textAlign: 'right' }}>Critical</span>
               </div>
             </div>
 
@@ -143,7 +149,7 @@ export function CoachingBrief({ appState, setAppState }) {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                 <UserCircle size={14} color="#C8B89A" />
-                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#909090' }}>Counterpart Disposition</span>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#909090' }}>how would you like your conversation counterpart to behave like?</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {['Receptive', 'Neutral', 'Defensive', 'Hostile'].map(opt => (

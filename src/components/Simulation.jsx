@@ -1,17 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useConversation } from '../hooks/useConversation';
 import { useWhisperInput } from '../hooks/useWhisperInput';
-import { useTTS } from '../hooks/useTTS'; // New hook
 import { checkDistress, checkSensitiveTopics, checkLength } from '../utils/guardrails';
-import { Mic, Square, Navigation2, Activity, X, Loader2, Gauge, Info, AlertTriangle, ShieldCheck, Volume2, VolumeX } from 'lucide-react';
+import { Mic, Square, Navigation2, Activity, X, Loader2, Gauge, Info, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 function Simulation({ appState, setAppState }) {
   const { persona, userProfile, conversationHistory } = appState;
   const [inputText, setInputText] = useState('');
   const [turnCount, setTurnCount] = useState(appState.turnCount || 0);
   const [pauseReason, setPauseReason] = useState(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [exitType, setExitType] = useState('dashboard'); // 'dashboard' | 'feedback'
+  const textareaRef = useRef(null);
 
-  const { speak, isMuted, toggleMute } = useTTS();
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [inputText]);
+
+
 
   const { 
     history, isLoading, errorObj, setErrorObj, sendUserMessage, 
@@ -20,13 +29,7 @@ function Simulation({ appState, setAppState }) {
     persona, userProfile, initialHistory: conversationHistory
   });
 
-  // TTS Trigger: Speak whenever a new model message arrives
-  useEffect(() => {
-    const lastMessage = history[history.length - 1];
-    if (lastMessage && lastMessage.role === 'model' && !isLoading) {
-      speak(lastMessage.content);
-    }
-  }, [history, isLoading, speak]);
+
 
   const chatEndRef = useRef(null);
 
@@ -96,14 +99,8 @@ function Simulation({ appState, setAppState }) {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button 
-              onClick={toggleMute} 
-              style={{ background: 'none', border: 'none', color: isMuted ? '#C86060' : '#C8B89A', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', textTransform: 'uppercase' }}
-            >
-              {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-              {isMuted ? 'Muted' : 'Voice On'}
-            </button>
-            <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ background: 'none', border: 'none', color: '#808080', cursor: 'pointer' }}><X size={20} /></button>
+
+            <button onClick={() => { setExitType('dashboard'); setShowExitConfirm(true); }} style={{ background: 'none', border: 'none', color: '#808080', cursor: 'pointer' }}><X size={20} /></button>
           </div>
         </header>
 
@@ -135,14 +132,29 @@ function Simulation({ appState, setAppState }) {
         {/* Input */}
         <footer style={{ padding: '24px', background: '#0D0D0D', borderTop: '1px solid #1A1A1A' }}>
           <div style={{ maxWidth: '640px', margin: '0 auto', display: 'flex', gap: '12px' }}>
-            <input 
-              value={inputText} 
-              onChange={e => setInputText(e.target.value)} 
-              onKeyDown={e => e.key === 'Enter' && handleSend()}
-              placeholder={isPaused ? "Simulation Paused" : "What is your next move?"}
-              disabled={isPaused || isLoading}
-              style={{ flex: 1, background: '#131313', border: '1px solid #222', padding: '14px 18px', borderRadius: '10px', color: '#F0EDE8', outline: 'none' }}
-            />
+            <div style={{ flex: 1, position: 'relative' }}>
+              <textarea 
+                ref={textareaRef}
+                value={inputText} 
+                onChange={e => setInputText(e.target.value)} 
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                placeholder={isPaused ? "Simulation Paused" : "What is your next move?"}
+                disabled={isPaused || isLoading}
+                rows={1}
+                style={{ 
+                  width: '100%', background: '#0D0D0D', 
+                  border: '1px solid #1A1A1A', 
+                  padding: '14px 20px', borderRadius: '16px', color: '#F0EDE8', outline: 'none',
+                  transition: 'all 0.2s', resize: 'none', overflowY: 'auto',
+                  minHeight: '46px', lineHeight: '1.5', fontFamily: 'inherit'
+                }}
+              />
+            </div>
             <button 
               onClick={handleSend}
               disabled={isPaused || !inputText.trim() || isLoading}
@@ -217,7 +229,7 @@ function Simulation({ appState, setAppState }) {
           </div>
         </section>
 
-        <button onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))} style={{ width: '100%', padding: '14px', background: 'transparent', border: '1px solid #1A1A1A', color: '#808080', borderRadius: '12px', fontSize: '12px', cursor: 'pointer', marginTop: 'auto' }}>End Practice Ready</button>
+        <button onClick={() => { setExitType('feedback'); setShowExitConfirm(true); }} style={{ width: '100%', padding: '14px', background: 'transparent', border: '1px solid #1A1A1A', color: '#808080', borderRadius: '12px', fontSize: '12px', cursor: 'pointer', marginTop: 'auto' }}>End Practice Ready</button>
       </aside>
 
       {/* ── STRATEGIC PAUSE OVERLAY ── */}
@@ -232,6 +244,46 @@ function Simulation({ appState, setAppState }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button onClick={() => { setIsPaused(false); setPauseReason(null); }} style={{ width: '100%', padding: '18px', background: '#C8B89A', color: '#000', border: 'none', borderRadius: '14px', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>Resume Simulation</button>
               <button onClick={() => handleEndSession()} style={{ width: '100%', padding: '16px', background: 'transparent', color: '#808080', border: '1px solid #1A1A1A', borderRadius: '14px', cursor: 'pointer' }}>View Early Debrief</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── EXIT CONFIRMATION OVERLAY ── */}
+      {showExitConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,15,15,0.95)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
+          <div style={{ maxWidth: '420px', background: '#111', border: '1px solid #1A1A1A', borderRadius: '28px', padding: '40px', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.8)' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '18px', background: 'rgba(200,184,154,0.08)', border: '1px solid rgba(200,184,154,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <AlertTriangle size={24} color={exitType === 'dashboard' ? '#C86060' : '#C8B89A'} />
+            </div>
+            
+            <h2 style={{ fontSize: '24px', fontWeight: '300', marginBottom: '12px', color: '#F0EDE8' }}>
+              {exitType === 'dashboard' ? 'Discard Progress?' : 'Finish Session?'}
+            </h2>
+            
+            <p style={{ color: '#808080', fontSize: '14px', lineHeight: '1.6', marginBottom: '32px' }}>
+              {exitType === 'dashboard' 
+                ? "Exiting now will end this practice. Your current history and feedback for this run will not be saved."
+                : "Are you ready to stop practicing and move to your final feedback report?"
+              }
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button 
+                onClick={() => { 
+                  if (exitType === 'dashboard') setAppState(prev => ({ ...prev, phase: 'profile' }));
+                  else handleEndSession();
+                }} 
+                style={{ width: '100%', padding: '16px', background: exitType === 'dashboard' ? '#C86060' : '#C8B89A', color: exitType === 'dashboard' ? '#FFF' : '#000', border: 'none', borderRadius: '14px', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}
+              >
+                {exitType === 'dashboard' ? 'Continue and Exit' : 'Submit for Feedback'}
+              </button>
+              <button 
+                onClick={() => setShowExitConfirm(false)} 
+                style={{ width: '100%', padding: '16px', background: 'transparent', color: '#808080', border: '1px solid #1A1A1A', borderRadius: '14px', fontSize: '13px', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

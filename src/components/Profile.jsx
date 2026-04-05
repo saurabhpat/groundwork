@@ -55,7 +55,7 @@ export function Profile({ appState, setAppState }) {
               <span style={{ color: '#C8B89A' }}>should never be your first practice.</span>
             </h1>
 
-            <p style={{ color: '#807870', fontSize: '16px', lineHeight: '1.7', maxWidth: '500px', margin: '0 auto 56px' }}>
+            <p style={{ color: '#808080', fontSize: '16px', lineHeight: '1.7', maxWidth: '500px', margin: '0 auto 56px' }}>
               Practice high-stakes career moments like salary negotiations and team conflicts in a safe space. Walk into the real room with calm confidence and a plan that actually lands.
             </p>
 
@@ -110,13 +110,9 @@ export function Profile({ appState, setAppState }) {
     <div style={{ background: '#0F0F0F', minHeight: '100vh', padding: '40px 24px 140px' }}>
       <div className="animate-in" style={{ maxWidth: '840px', margin: '0 auto' }}>
         
-        {/* HEADER */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
           <div>
-            <div style={{ fontSize: '12px', color: '#909090', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
-              Your Performance
-            </div>
-            <h1 style={{ fontSize: '32px', fontWeight: '300', color: '#F0EDE8', margin: 0 }}>Progress Engine</h1>
+            <h1 style={{ fontSize: '32px', fontWeight: '300', color: '#F0EDE8', margin: 0 }}>Your Performance Progress</h1>
           </div>
         </div>
 

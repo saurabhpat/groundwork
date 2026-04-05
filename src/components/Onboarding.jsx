@@ -100,6 +100,15 @@ function SuggestionChip({ label, isSelected, isMulti, onClick }) {
 
 // ─── Active step ──────────────────────────────────────────────────────────────
 function ActiveStep({ step, selectedOptions, customText, setCustomText, onToggle, onSubmit, canSubmit, isSynthesizing }) {
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 140)}px`;
+    }
+  }, [customText]);
+
   return (
     <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div>
@@ -115,19 +124,37 @@ function ActiveStep({ step, selectedOptions, customText, setCustomText, onToggle
         ))}
       </div>
 
-      <input
-        type="text" value={customText}
-        onChange={e => setCustomText(e.target.value)}
-        onKeyDown={e => { if (e.key === 'Enter' && canSubmit && !isSynthesizing) onSubmit(); }}
-        placeholder={step.placeholder}
-        style={{
-          width: '100%', background: 'transparent', border: '1px dashed #252525',
-          borderRadius: '10px', padding: '12px 16px', color: '#F0EDE8', fontSize: '14px',
-          outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.2s',
-        }}
-        onFocus={e => e.target.style.borderColor = '#3A3A3A'}
-        onBlur={e => e.target.style.borderColor = '#252525'}
-      />
+      <div style={{ position: 'relative' }}>
+        <textarea
+          ref={textareaRef}
+          value={customText}
+          onChange={e => setCustomText(e.target.value)}
+          onKeyDown={e => { 
+            if (e.key === 'Enter' && !e.shiftKey && canSubmit && !isSynthesizing) {
+              e.preventDefault();
+              onSubmit(); 
+            }
+          }}
+          placeholder="Tell us more (max 300 characters)..."
+          rows={3}
+          style={{
+            width: '100%', background: '#0D0D0D', 
+            border: `1px solid ${customText.length >= 300 ? '#C86060' : '#1A1A1A'}`,
+            borderRadius: '16px', padding: '18px 20px', color: '#F0EDE8', fontSize: '15px',
+            outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'all 0.2s',
+            resize: 'none', overflowY: 'auto', minHeight: '100px', lineHeight: '1.6',
+          }}
+          onFocus={e => { if (customText.length < 300) e.target.style.borderColor = '#333'; }}
+          onBlur={e => { if (customText.length < 300) e.target.style.borderColor = '#1A1A1A'; }}
+        />
+        <div style={{ 
+          position: 'absolute', right: '16px', bottom: '-22px', 
+          fontSize: '10px', color: customText.length >= 300 ? '#C86060' : '#808080', 
+          textTransform: 'uppercase', letterSpacing: '0.06em' 
+        }}>
+          {customText.length}/300
+        </div>
+      </div>
 
       <button
         onClick={onSubmit} disabled={!canSubmit || isSynthesizing}
@@ -179,7 +206,7 @@ function FinalScreen({ finalProfile, onLaunch, isLoading, error }) {
           { label: 'What You Want', value: finalProfile.practiceGoal },
         ].map(({ label, value }, i, arr) => (
           <div key={label} style={{ padding: '14px 18px', borderBottom: i < arr.length - 1 ? '1px solid #1A1A1A' : 'none', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <div style={{ fontSize: '10px', color: '#383838', textTransform: 'uppercase', letterSpacing: '0.09em' }}>{label}</div>
+            <div style={{ fontSize: '10px', color: '#808080', textTransform: 'uppercase', letterSpacing: '0.09em' }}>{label}</div>
             <div style={{ fontSize: '14px', color: '#C8B89A', lineHeight: '1.4' }}>{value}</div>
           </div>
         ))}
@@ -269,7 +296,11 @@ export function Onboarding({ appState, setAppState }) {
   return (
     <div style={{ background: '#0F0F0F', height: '100%', display: 'flex', flexDirection: 'column' }}>
 
-      <div style={{ padding: '18px 24px 14px', flexShrink: 0, borderBottom: '1px solid #141414', background: 'rgba(15,15,15,0.9)', backdropFilter: 'blur(8px)' }}>
+      <div style={{ 
+        padding: '18px 24px 14px', flexShrink: 0, borderBottom: '1px solid #141414', 
+        background: 'rgba(15,15,15,0.9)', backdropFilter: 'blur(8px)',
+        position: 'sticky', top: 0, zIndex: 10
+      }}>
         <button
           onClick={() => setAppState(prev => ({ ...prev, phase: 'profile' }))}
           style={{ background: 'transparent', border: 'none', color: '#808080', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '7px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '16px', transition: 'color 0.2s', padding: 0 }}
