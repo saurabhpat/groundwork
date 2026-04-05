@@ -53,6 +53,16 @@ function App() {
     }
   }, []);
 
+  // Global Navigation Guard: If phase is 'profile' but no sessions exist, redirect to 'landing'
+  useEffect(() => {
+    if (appState.phase === 'profile') {
+      const sessions = JSON.parse(localStorage.getItem('groundwork_sessions') || '[]');
+      if (sessions.length === 0) {
+        setAppState(prev => ({ ...prev, phase: 'landing' }));
+      }
+    }
+  }, [appState.phase]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <BrandHeader onClick={goHome} />
