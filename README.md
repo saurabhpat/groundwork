@@ -14,28 +14,6 @@ Groundwork is a safe space to simulate high-stakes career conversations—from s
 
 Groundwork transforms the coaching experience by moving beyond static advice. It uses state-of-the-art LLMs and Speech-to-Text models to create dynamic, responsive counterparties that react to your tone, strategy, and phrasing in real-time.
 
-### 🌟 Key Features
-- **Analytical Career Onboarding:** A 6-step interactive profiling process to define your specific professional context.
-- **Dynamic Simulation Engine:** Powered by `llama-3.3-70b-versatile`, providing high-fidelity conversational logic.
-- **Voice-First Interaction:** Integrated STT using Groq's high-speed `whisper-large-v3-turbo`.
-- **Real-time Performance Health:** Track session health and stress signals as you speak.
-- **Deep Analytics:** Receive a comprehensive feedback report with rhetorical markers and alternative phrasing recommendations.
-
----
-
-## 📸 Visual Walkthrough
-
-### 1. Proposition Landing Page
-![Proposition Landing Page](images/landing.png)
-The proposition-led entry point that defines the product's mission: "Talk to AI before talking to the real person."
-
-### 2. Analytical Profile & History
-![Analytical Profile](images/profile.png)
-A high-level dashboard of past performance, providing an overview of your progress and history.
-
-### 3. Live AI Simulation
-![AI Simulation](images/simulation.png)
-The core practice engine where you engage in a realistic simulation with an AI counterparty.
 
 ---
 
