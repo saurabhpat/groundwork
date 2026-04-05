@@ -31,7 +31,14 @@ function App() {
     feedbackReason: "",
   });
 
-  const goHome = () => setAppState(prev => ({ ...prev, phase: 'landing' }));
+  const goHome = () => {
+    const sessions = JSON.parse(localStorage.getItem('groundwork_sessions') || '[]');
+    if (sessions.length > 0) {
+      setAppState(prev => ({ ...prev, phase: 'profile' }));
+    } else {
+      setAppState(prev => ({ ...prev, phase: 'landing' }));
+    }
+  };
 
   // Check initial state - always start on landing as per feedback
   useEffect(() => {

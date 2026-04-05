@@ -5,10 +5,15 @@ import { FeedbackReport } from './FeedbackReport';
 export function Profile({ appState, setAppState }) {
   const [sessions, setSessions] = useState([]);
   const [selectedHistoricalSession, setSelectedHistoricalSession] = useState(null);
-  
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
   useEffect(() => {
     const rawData = JSON.parse(localStorage.getItem('groundwork_sessions') || '[]');
     setSessions(rawData);
+
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleStartPractice = () => {
@@ -50,17 +55,21 @@ export function Profile({ appState, setAppState }) {
               <Zap size={28} color="#C8B89A" />
             </div>
 
-            <h1 style={{ fontSize: '38px', fontWeight: '300', color: '#F0EDE8', margin: '0 0 16px', letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: isMobile ? '32px' : '38px', fontWeight: '300', color: '#F0EDE8', margin: '0 0 16px', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
               Your most important conversation<br />
               <span style={{ color: '#C8B89A' }}>should never be your first practice.</span>
             </h1>
 
-            <p style={{ color: '#808080', fontSize: '16px', lineHeight: '1.7', maxWidth: '500px', margin: '0 auto 56px' }}>
+            <p style={{ color: '#808080', fontSize: isMobile ? '14px' : '16px', lineHeight: '1.7', maxWidth: '500px', margin: '0 auto 56px' }}>
               Practice high-stakes career moments like salary negotiations and team conflicts in a safe space. Walk into the real room with calm confidence and a plan that actually lands.
             </p>
 
             {/* How it works */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', maxWidth: '640px', margin: '0 auto 64px', textAlign: 'left' }}>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', 
+              gap: '16px', maxWidth: '640px', margin: '0 auto 64px', textAlign: 'left' 
+            }}>
               {[
                 { icon: <Target size={18} color="#C8B89A" />, label: 'Pick a scenario', sub: 'Choose the conversation you need to master' },
                 { icon: <MessageSquare size={18} color="#C8B89A" />, label: 'Simulate it live', sub: 'Speak or type with a realistic AI persona' },
@@ -133,15 +142,15 @@ export function Profile({ appState, setAppState }) {
         </div>
 
         {/* KEY TRACKS */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '48px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px', marginBottom: '40px' }}>
           <div style={{ background: '#1A1A1A', padding: '24px', borderRadius: '16px', border: '1px solid #1E1E1E' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#A09890', fontSize: '11px', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#A09890', fontSize: '11px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               <TrendingUp size={14} color="#C8B89A" /> Total Simulations
             </div>
             <div style={{ fontSize: '32px', fontWeight: '300', color: '#F0EDE8' }}>{sessions.length}</div>
           </div>
           <div style={{ background: '#1A1A1A', padding: '24px', borderRadius: '16px', border: '1px solid #1E1E1E' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#A09890', fontSize: '11px', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#A09890', fontSize: '11px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               <ShieldCheck size={14} color="#4E9B6F" /> Last Intensity
             </div>
             <div style={{ fontSize: '32px', fontWeight: '300', color: '#F0EDE8' }}>{sessions[sessions.length-1].difficulty}</div>

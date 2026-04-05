@@ -11,7 +11,15 @@ function Simulation({ appState, setAppState }) {
   const [pauseReason, setPauseReason] = useState(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [exitType, setExitType] = useState('dashboard'); // 'dashboard' | 'feedback'
+  const [isCoachOpen, setIsCoachOpen] = useState(false);
   const textareaRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -173,8 +181,37 @@ function Simulation({ appState, setAppState }) {
         </footer>
       </section>
 
-      {/* ── RIGHT: COACH CONSOLE (25%) ── */}
-      <aside style={{ flex: 1, background: '#0D0D0D', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: '40px' }}>
+      {/* ── MOBILE: COACH TOGGLE FAB ── */}
+      {isMobile && !isPaused && (
+        <button 
+          onClick={() => setIsCoachOpen(true)}
+          style={{ position: 'fixed', right: '16px', bottom: '100px', width: '56px', height: '56px', borderRadius: '28px', background: '#C8B89A', color: '#090909', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.5)', zIndex: 100, cursor: 'pointer' }}
+        >
+          <Info size={24} />
+        </button>
+      )}
+
+      {/* ── RIGHT: COACH CONSOLE (Drawer on mobile) ── */}
+      <aside style={{ 
+        flex: isMobile ? 'none' : 1, 
+        background: '#0D0D0D', 
+        padding: '32px 24px', 
+        display: isMobile && !isCoachOpen ? 'none' : 'flex', 
+        flexDirection: 'column', gap: '40px',
+        position: isMobile ? 'fixed' : 'relative',
+        inset: isMobile ? '0 0 0 0' : 'auto',
+        zIndex: isMobile ? 120 : 1,
+        borderLeft: isMobile ? 'none' : '1px solid #1A1A1A',
+        animation: isMobile ? 'slideUp 0.3s ease-out' : 'none'
+      }}>
+        {isMobile && (
+          <button 
+            onClick={() => setIsCoachOpen(false)}
+            style={{ alignSelf: 'flex-end', background: 'transparent', border: 'none', color: '#808080', cursor: 'pointer', marginBottom: '-20px' }}
+          >
+            <X size={24} />
+          </button>
+        )}
         
         {/* Health Watchdog */}
         <section>

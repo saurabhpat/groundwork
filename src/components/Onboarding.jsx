@@ -101,6 +101,13 @@ function SuggestionChip({ label, isSelected, isMulti, onClick }) {
 // ─── Active step ──────────────────────────────────────────────────────────────
 function ActiveStep({ step, selectedOptions, customText, setCustomText, onToggle, onSubmit, canSubmit, isSynthesizing }) {
   const textareaRef = useRef(null);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsSmallScreen(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -112,7 +119,7 @@ function ActiveStep({ step, selectedOptions, customText, setCustomText, onToggle
   return (
     <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div>
-        <div style={{ fontSize: '22px', color: '#F0EDE8', fontWeight: '300', lineHeight: '1.55', marginBottom: step.hint ? '8px' : '0' }}>
+        <div style={{ fontSize: isSmallScreen ? '19px' : '22px', color: '#F0EDE8', fontWeight: '300', lineHeight: '1.55', marginBottom: step.hint ? '8px' : '0' }}>
           {step.message}
         </div>
         {step.hint && <div style={{ fontSize: '12px', color: '#808080', lineHeight: '1.5', letterSpacing: '0.01em' }}>{step.hint}</div>}
@@ -316,8 +323,8 @@ export function Onboarding({ appState, setAppState }) {
         </div>
       </div>
 
-      <main style={{ flex: 1, overflowY: 'auto', padding: '32px 24px 48px' }}>
-        <div style={{ maxWidth: '540px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '36px' }}>
+      <main style={{ flex: 1, overflowY: 'auto', padding: window.innerWidth < 768 ? '24px 16px 48px' : '32px 24px 48px' }}>
+        <div style={{ maxWidth: '540px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
 
           {/* Completed steps — each answer chip is clickable to edit */}
           {completedSteps.map((s, idx) => (

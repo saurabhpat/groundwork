@@ -36,7 +36,8 @@ export function BrandHeader({ onClick }) {
         fontWeight: '300',
         color: '#605850',
         textAlign: 'center',
-        maxWidth: '600px',
+        maxWidth: '90%',
+        width: '600px',
         lineHeight: '1.4'
       }}>
         Strategize your uncertain high-stakes career conversations with grounded calmness and real-world practices.
