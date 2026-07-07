@@ -1,5 +1,8 @@
-const getGroqKey = () =>
-  sessionStorage.getItem('GROQ_API_KEY') || import.meta.env.VITE_GROQ_API_KEY;
+const getGroqKey = () => {
+  const key = sessionStorage.getItem('GROQ_API_KEY') || import.meta.env.VITE_GROQ_API_KEY || '';
+  // Strip any non-ASCII characters (e.g. zero-width spaces, invisible unicode) that crash fetch headers
+  return key.replace(/[^\x20-\x7E]/g, '').trim();
+};
 
 const GROQ_BASE = 'https://api.groq.com/openai/v1';
 
