@@ -26,11 +26,13 @@ A deep-dive analysis into the session performance, highlighting rhetorical marke
 
 ## 2. Internal Architecture
 - **Frontend:** React 18 SPA built with Vite.
-- **State Management:** Centralized in `App.jsx`, utilizing local storage for session persistence and API keys.
+- **State Management & Persistence:** Centralized in `App.jsx`, utilizing a cloud PostgreSQL database (Supabase) for real-time auth and session/conversation persistence.
 - **Logic Decoupling:** Core functionalities are isolated into custom React hooks (`useOnboardingChat.js`, `useConversation.js`).
 - **AI Client:** A robust, unified client (`aiClient.js`) that handles Groq API communication, transcription, and JSON cleaning.
 
 ## 3. Tech Stack & Models
+- **Database / Backend:** Supabase (Auth + PostgreSQL RLS)
+- **Hosting / CI/CD:** Render (Static Site)
 - **Provider:** Groq API
 - **LLM:** `llama-3.3-70b-versatile`
 - **STT:** `whisper-large-v3-turbo` (Groq Whisper)

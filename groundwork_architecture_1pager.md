@@ -13,7 +13,7 @@ The proposition-led entry point identifies the core mission: "Talk to AI before 
 
 ### Stage 1: Analytical Profile & History
 ![Analytical Profile](file:///C:/Users/patil/.gemini/antigravity/brain/db08ab87-1c88-45d9-9c44-870d35c59490/profile_png_1775285201276.png)
-The analytical dashboard provides a high-level overview of past performance and entry into the simulation engine. Users can review their historical performance trends and session summaries before starting a new practice session.
+The analytical dashboard provides a high-level overview of past performance and entry into the simulation engine. Users can review their historical performance trends and session summaries, retrieved dynamically from their secure Supabase profile, before starting a new practice session.
 
 ### Stage 2: Career Context Onboarding
 ![Career Onboarding](file:///C:/Users/patil/.gemini/antigravity/brain/db08ab87-1c88-45d9-9c44-870d35c59490/onboarding_png_1775285214094.png)
@@ -36,6 +36,8 @@ A deep-dive analysis into the session performance, highlighting rhetorical marke
 ## 2. Technology Stack & AI Models
 
 - **Frontend Framework:** React 18 SPA built with Vite for optimal performance.
+- **Backend & Database:** Supabase (PostgreSQL) for secure authentication, persistent session memory, and row-level security (RLS).
+- **Deployment & Hosting:** Render (Static Site) linked directly to the main branch for CI/CD.
 - **Styling Architecture:** Vanilla CSS design system utilizing custom premium tokens for a sleek, professional look.
 - **AI Infrastructure:** Groq Cloud for ultra-low latency inference.
 - **LLM Engine:** `llama-3.3-70b-versatile` (Llama 3.3).
@@ -45,7 +47,7 @@ A deep-dive analysis into the session performance, highlighting rhetorical marke
 
 ## 3. Technical Architecture
 
-- **State Management:** Centralized in the `App.jsx` root, utilizing React `useState` and `localStorage` for session persistence.
+- **State Management & Persistence:** Centralized in the `App.jsx` root. Local application state is managed via React `useState`, while session history, conversation turns, and user profiles are securely persisted and retrieved from a cloud PostgreSQL database via Supabase.
 - **Logic Decoupling:** Core engines are isolated into custom hooks (`useOnboardingChat.js`, `useConversation.js`) to keep the UI layer focused.
 - **AI Client Layer:** A unified `aiClient.js` module handles all Groq API communication, including automatic JSON cleaning and robust error fallbacks.
 

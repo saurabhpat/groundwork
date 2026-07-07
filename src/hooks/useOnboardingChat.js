@@ -2,187 +2,124 @@ import { useState } from 'react';
 import { robustGenerate } from '../utils/aiClient';
 import { checkDistress } from '../utils/guardrails';
 
-// ─── The 5 hardcoded onboarding steps ────────────────────────────────────────
+// ─── Reduced to 3 steps as per V2 design ─────────────────────────────────────
 export const ONBOARDING_STEPS = [
   {
     id: 'conversation_type',
     message: "What kind of conversation are you here to practice?",
-    hint: "Pick the one that feels most familiar or urgent right now.",
+    hint: "Pick the one that feels most urgent right now.",
     isMulti: false,
+    isVoice: false,
     suggestions: [
       "Asking for a raise or promotion",
       "Giving feedback to someone on my team",
       "Pushing back on my manager",
       "Resolving a conflict with a colleague",
       "Setting a boundary at work",
-      "Negotiating with a client or stakeholder",
+      "Negotiating with a client or investor",
     ],
     placeholder: "Something else — describe it…",
   },
   {
-    id: 'goal',
-    message: "What does a good outcome look like for you?",
-    hint: "What would make you feel like this conversation actually went well?",
+    id: 'counterparty',
+    message: "Who will you be speaking to?",
+    hint: "This shapes the persona we build for you.",
     isMulti: false,
+    isVoice: false,
     suggestions: [
-      "They agree to what I'm asking for",
-      "I'm heard without it turning into a fight",
-      "I walk away with a clear answer — yes or no",
-      "The relationship stays intact after",
-      "I finally say what I've been holding back",
+      "My direct manager",
+      "A senior leader or executive",
+      "A peer / colleague at my level",
+      "Someone I manage or mentor",
+      "A client or external stakeholder",
+      "An investor or board member",
     ],
-    placeholder: "My own definition of winning this…",
+    placeholder: "Someone else — describe who…",
   },
   {
-    id: 'blockers',
-    message: "What's gotten in the way before?",
-    hint: "Select everything that rings true — you can pick more than one.",
-    isMulti: true,
-    suggestions: [
-      "I freeze when they push back",
-      "I don't know how to start the conversation",
-      "I back down too quickly under pressure",
-      "I say too much and lose my main point",
-      "I keep avoiding it until it becomes urgent",
-      "I'm afraid of damaging the relationship",
-    ],
-    placeholder: "Something else that holds me back…",
-  },
-  {
-    id: 'confidence',
-    message: "How do you feel about having the high-stake conversation right now.",
-    hint: "Be honest — there's no wrong answer here.",
+    id: 'context_dump',
+    message: "Tell us about the situation.",
+    hint: "Speak freely or type — the more context you share, the sharper your practice session will be. What happened, what you fear, what outcome you want.",
     isMulti: false,
-    suggestions: [
-      "Anxious — I've been putting it off",
-      "Nervous, but I know I need to do this",
-      "Somewhat ready, I just need a clear structure",
-      "I've tried before and it didn't go well",
-    ],
-    placeholder: "It's more complicated than that…",
-  },
-  {
-    id: 'outcome',
-    message: "What would make this practice session feel worth it?",
-    hint: null,
-    isMulti: false,
-    suggestions: [
-      "A confident, clear way to open the conversation",
-      "Knowing I can hold my ground when pushed back on",
-      "Feeling less scared about how they'll react",
-      "Exact phrases I can actually use in the moment",
-      "More clarity on what I actually want from this",
-    ],
-    placeholder: "Something specific I'm hoping for…",
-  },
-  {
-    id: 'actual_scenario',
-    message: "In your own words, what is happening?",
-    hint: "Describe your last difficult conversation or the specific situation you're facing. This is the 'golden' input for the AI.",
-    isMulti: false,
-    suggestions: [
-      "I need to ask for a raise after my last review",
-      "A teammate keeps missing deadlines and it's affecting me",
-      "My manager keeps changing priorities every week",
-      "I'm nervous about giving feedback to a senior leader",
-    ],
-    placeholder: "Type or use voice to describe your specific situation...",
+    isVoice: true, // ← enables mic button on this step
+    suggestions: [],
+    placeholder: "Describe your situation in your own words — or tap the mic to speak…",
   },
 ];
 
-// ─── Synthesis prompt — runs once after all 5 answers ────────────────────────
+// ─── Synthesis prompt ─────────────────────────────────────────────────────────
 const SYNTHESIS_SYSTEM_PROMPT = `You are a scenario analyst for Groundwork, a professional conversation-coaching platform.
-A user has just completed an onboarding with 6 steps. Based on their answers, synthesise their coaching profile.
+A user has completed a short onboarding. Based on their 3 answers, synthesise their coaching profile.
 
 RULES — STRICT:
 - Do NOT invent any detail not supported by the user's answers.
-- "actualSituation" is the raw, specific context from the user; preserve its core detail.
+- "actualSituation" must preserve the user's raw context from step 3 in full.
 - Map their situation to EXACTLY ONE of these 8 archetypes:
   Salary Negotiation | Asking for a Promotion | Giving Difficult Feedback | Conflict with a Peer | Disagreeing with a Manager | Delivering Bad News | Client Negotiation | Setting a Boundary
 - "experienceLevel" must be exactly one of: "never" | "tried_failed" | "regular_but_costly"
-- "summary_message" must be 2–3 warm, empathetic sentences that reflect their specific answers back to them.
+- "relationshipContext" should reflect the counterparty they chose in step 2.
+- "summary_message" must be 2–3 warm, empathetic sentences that reflect their specific situation back to them.
 - Return ONLY valid JSON — no markdown, no extra text.
 
 OUTPUT SCHEMA:
 {
   "summary_message": "string",
-  "whoAreYou": "string",
+  "whoAreYou": "string (inferred from context — their role/title if mentioned, otherwise 'Professional')",
   "practiceGoal": "string",
   "scenario": "exactly one of the 8 archetypes",
   "relationshipContext": "string",
-  "communicationFear": "string",
-  "actualSituation": "string (the user's specific raw input from step 6)",
+  "communicationFear": "string (their biggest fear about this conversation)",
+  "actualSituation": "string (the user's full context from step 3)",
   "experienceLevel": "never | tried_failed | regular_but_costly"
-}
-`;
-
-const SUGGESTIONS_SYSTEM_PROMPT = `You are a scenario brainstormer for Groundwork.
-Based on the user's previous answers (Goal, Blockers, Confidence), generate 4 short suggestions (max 12 words each) for their specific "what is happening" scenario.
-The suggestions should be realistic, diverse, and directly relevant to the themes they've already mentioned.
-
-Return ONLY this JSON:
-{
-  "suggestions": ["string", "string", "string", "string"]
 }
 `;
 
 export function useOnboardingChat() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState([]); // {stepId, question, answer, answerArray}
+  const [completedSteps, setCompletedSteps] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState(new Set());
   const [customText, setCustomText] = useState('');
   const [phase, setPhase] = useState('onboarding'); // 'onboarding' | 'synthesizing' | 'complete'
   const [finalProfile, setFinalProfile] = useState(null);
   const [error, setError] = useState(null);
   const [isDistress, setIsDistress] = useState(false);
-  const [dynamicSuggestions, setDynamicSuggestions] = useState(null);
 
   const step = ONBOARDING_STEPS[currentStep];
   const isLastStep = currentStep === ONBOARDING_STEPS.length - 1;
 
-  // Toggle a chip (single vs multi-select)
+  // Toggle a chip option (single select only for all V2 steps)
   const toggleOption = (option) => {
     setError(null);
-    if (step.isMulti) {
-      setSelectedOptions(prev => {
-        const next = new Set(prev);
-        next.has(option) ? next.delete(option) : next.add(option);
-        return next;
-      });
-    } else {
-      setSelectedOptions(prev => {
-        const next = new Set(prev);
-        if (next.has(option)) { next.delete(option); } else { next.clear(); next.add(option); }
-        return next;
-      });
-    }
+    setSelectedOptions(prev => {
+      const next = new Set(prev);
+      if (next.has(option)) { next.delete(option); } else { next.clear(); next.add(option); }
+      return next;
+    });
   };
 
-  // Compute current answer from chips + custom text
+  // Compute answer from chips + freeform text
   const getCurrentAnswer = () => {
     const custom = customText.trim();
     const selected = [...selectedOptions];
-    if (step.isMulti) {
-      const all = [...selected, ...(custom ? [custom] : [])];
-      return all.length > 0 ? all : null;
-    } else {
-      if (custom) return custom;
-      if (selected.length > 0) return selected[0];
-      return null;
+    if (step.isVoice) {
+      // Context dump step: only text/voice, no chips
+      return custom || null;
     }
+    if (custom) return custom;
+    if (selected.length > 0) return selected[0];
+    return null;
   };
 
   const canSubmit = getCurrentAnswer() !== null;
 
-  // Submit the current step — advances or triggers synthesis on last step
   const submitCurrentStep = async () => {
     const answer = getCurrentAnswer();
-    if (!answer || (Array.isArray(answer) && answer.length === 0)) return;
+    if (!answer) return;
 
     if (customText.trim() && checkDistress(customText.trim())) setIsDistress(true);
 
+    const answerDisplay = Array.isArray(answer) ? answer.join(' · ') : answer;
     const answerArray = Array.isArray(answer) ? answer : [answer];
-    const answerDisplay = answerArray.join(' · ');
 
     const newCompleted = [
       ...completedSteps,
@@ -208,51 +145,23 @@ export function useOnboardingChat() {
         setPhase('onboarding');
       }
     } else {
-      // Trigger background suggestion generation after Question 5 (index 4)
-      if (currentStep === 4) {
-        generateScenarioSuggestions(newCompleted);
-      }
       setCurrentStep(prev => prev + 1);
       setSelectedOptions(new Set());
       setCustomText('');
     }
   };
 
-  const generateScenarioSuggestions = async (priorSteps) => {
-    const answersBlock = priorSteps
-      .map((s, i) => `Step ${i + 1} — ${s.question}\nAnswer: "${s.answer}"`)
-      .join('\n\n');
-    try {
-      const data = await robustGenerate({
-        systemInstruction: SUGGESTIONS_SYSTEM_PROMPT,
-        contents: [{ role: 'user', parts: [{ text: answersBlock }] }],
-        thermal: 0.7,
-      });
-      if (data && data.suggestions) setDynamicSuggestions(data.suggestions);
-    } catch (err) {
-      console.warn("Dynamic suggestions failed:", err);
-    }
-  };
-
-  /**
-   * Go back to a specific step and restore the previously-given answer.
-   * Clears all steps from `idx` onwards.
-   */
   const goToStep = (idx) => {
     if (idx < 0 || idx >= ONBOARDING_STEPS.length) return;
-
-    const priorEntry = completedSteps[idx]; // Answer previously given at this step
-
+    const priorEntry = completedSteps[idx];
     setCompletedSteps(prev => prev.slice(0, idx));
     setCurrentStep(idx);
     setPhase('onboarding');
     setFinalProfile(null);
     setError(null);
-
-    if (priorEntry && priorEntry.answerArray) {
+    if (priorEntry?.answerArray) {
       const stepDef = ONBOARDING_STEPS[idx];
       const arr = priorEntry.answerArray;
-      // Split into suggestion-matched items vs custom text
       const matchedSuggestions = arr.filter(a => stepDef.suggestions.includes(a));
       const customParts = arr.filter(a => !stepDef.suggestions.includes(a));
       setSelectedOptions(new Set(matchedSuggestions));
@@ -268,23 +177,24 @@ export function useOnboardingChat() {
     completedSteps,
     selectedOptions,
     customText,
-    setCustomText: (text) => setCustomText(text.slice(0, 300)),
+    setCustomText: (val) => {
+      if (typeof val === 'function') {
+        setCustomText(prev => val(prev).slice(0, 600));
+      } else {
+        setCustomText(val.slice(0, 600));
+      }
+    }, // Larger limit for context dump
     phase,
     finalProfile,
     error,
     setError,
     isDistress,
     dismissDistress: () => setIsDistress(false),
-    step: {
-      ...step,
-      suggestions: (currentStep === ONBOARDING_STEPS.length - 1 && dynamicSuggestions) 
-        ? dynamicSuggestions 
-        : step.suggestions
-    },
+    step,
     isLastStep,
     toggleOption,
     submitCurrentStep,
     canSubmit,
-    goToStep, // ← back-navigation
+    goToStep,
   };
 }

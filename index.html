@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Groundwork</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body { 
-        background: #0F0F0F; 
-        color: #F0EDE8; 
-        font-family: system-ui, -apple-system, sans-serif;
+        background: #FFFFFF; 
+        color: #111827; 
+        font-family: 'Outfit', system-ui, -apple-system, sans-serif;
         min-height: 100vh;
       }
       @keyframes fadeUp { 
@@ -23,15 +26,15 @@
         50% { transform: scale(1.4); opacity: 1; }
       }
       @keyframes mic-pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(200,184,154,0.4); }
-        50% { box-shadow: 0 0 0 12px rgba(200,184,154,0); }
+        0%, 100% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.4); }
+        50% { box-shadow: 0 0 0 12px rgba(29, 78, 216, 0); }
       }
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
       .animate-in { animation: fadeUp 0.4s ease forwards; }
       .dot { 
-        width: 7px; height: 7px; background: #A09890; 
+        width: 7px; height: 7px; background: #9CA3AF; 
         border-radius: 50%; display: inline-block;
         animation: dot-pulse 0.8s ease-in-out infinite;
       }
@@ -40,8 +43,8 @@
       .mic-listening { animation: mic-pulse 1.2s ease-in-out infinite; }
       .spinner {
         width: 28px; height: 28px;
-        border: 2px solid #2A2A2A;
-        border-top-color: #C8B89A;
+        border: 2px solid #E5E7EB;
+        border-top-color: #1D4ED8;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
       }
